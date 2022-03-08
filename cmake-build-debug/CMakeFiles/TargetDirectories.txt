@@ -1,0 +1,3 @@
+/home/miguel/Documentos/Universidade/3º ano/2º Semestre/Computação gráfica/CG2022/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/miguel/Documentos/Universidade/3º ano/2º Semestre/Computação gráfica/CG2022/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/miguel/Documentos/Universidade/3º ano/2º Semestre/Computação gráfica/CG2022/cmake-build-debug/CMakeFiles/CG2022.dir
