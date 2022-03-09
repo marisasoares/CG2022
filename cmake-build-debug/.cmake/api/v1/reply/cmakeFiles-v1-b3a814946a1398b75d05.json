@@ -120,6 +120,41 @@
 			"isCMake" : true,
 			"isExternal" : true,
 			"path" : "/home/miguel/Transferências/CLion-2021.3.3/clion-2021.3.3/bin/cmake/linux/share/cmake-3.21/Modules/CMakeCommonLanguageInclude.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/home/miguel/Transferências/CLion-2021.3.3/clion-2021.3.3/bin/cmake/linux/share/cmake-3.21/Modules/FindOpenGL.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/home/miguel/Transferências/CLion-2021.3.3/clion-2021.3.3/bin/cmake/linux/share/cmake-3.21/Modules/FindPackageHandleStandardArgs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/home/miguel/Transferências/CLion-2021.3.3/clion-2021.3.3/bin/cmake/linux/share/cmake-3.21/Modules/FindPackageMessage.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/home/miguel/Transferências/CLion-2021.3.3/clion-2021.3.3/bin/cmake/linux/share/cmake-3.21/Modules/FindGLUT.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/home/miguel/Transferências/CLion-2021.3.3/clion-2021.3.3/bin/cmake/linux/share/cmake-3.21/Modules/SelectLibraryConfigurations.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/home/miguel/Transferências/CLion-2021.3.3/clion-2021.3.3/bin/cmake/linux/share/cmake-3.21/Modules/FindPackageHandleStandardArgs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/home/miguel/Transferências/CLion-2021.3.3/clion-2021.3.3/bin/cmake/linux/share/cmake-3.21/Modules/FindPackageMessage.cmake"
 		}
 	],
 	"kind" : "cmakeFiles",
