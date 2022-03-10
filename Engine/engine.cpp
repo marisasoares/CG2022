@@ -134,7 +134,7 @@ void processSpecialKeys(int key, int xx, int yy) {
 int main(int argc, char **argv) {
     if(argc != 3){
         cout << "Sintax error:\n";
-        cout << "   Usage: ./engine [XML configuration file] [3d file to open]\n";
+        cout << "   Usage: ./Engine [XML configuration file] [3d file to open]\n";
         exit(-1);
     }
     string xmlFile = argv[1];

@@ -1,16 +1,13 @@
 cmake_minimum_required(VERSION 3.21)
-project(CG2022)
+project(generator)
 
 set(CMAKE_CXX_STANDARD 14)
 
-include_directories(.)
+include_directories(..)
 
-add_executable(CG2022
-        engine.cpp
-        engine.h
-        generator.cpp
+add_executable(generator
         generator.h
-        vertices.cpp)
+        generator.cpp)
 
 find_package(OpenGL REQUIRED)
 include_directories(${OpenGL_INCLUDE_DIRS})
@@ -39,7 +36,7 @@ if  (WIN32)
         file(COPY ${TOOLKITS_FOLDER}/glut/glut32.dll DESTINATION ${CMAKE_BINARY_DIR})
     endif(EXISTS "${TOOLKITS_FOLDER}/glut/glut32.dll" )
 
-    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME})
+    set_property(DIRECTORY .. PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME})
 
 else (WIN32) #Linux and Mac
 
