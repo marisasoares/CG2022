@@ -9,6 +9,68 @@
 
 using namespace std;
 
+string filename;
+
+void drawPlane(float length, int divisions) {
+
+    float x1 = length / 2;
+    float z1 = length / 2;
+    float div = length / divisions;
+
+    int i, j;
+
+    float x = -x1;
+    float z = -z1;
+
+    fstream file;
+    file.open("plane.3d",ios::out);
+    //char* string = malloc(sizeof(char) * 20);
+    string coord;
+
+
+    for (i = 0; i < divisions; i++) {
+        for (j = 0; j < divisions; j++) {
+
+            //1º triangulo
+            file << x;
+            file << " 0 ";
+            file << z;
+            file << "\n";
+
+            file << x+div;
+            file << " 0 ";
+            file << z+div;
+            file << "\n";
+
+            file << x+div;
+            file << " 0 ";
+            file << z;
+            file << "\n";
+
+            //2 triangulo
+
+            file << x + div;
+            file << " 0 ";
+            file << z + div;
+            file << "\n";
+
+            file << x;
+            file << " 0 ";
+            file << z;
+            file << "\n";
+
+            file << x;
+            file << " 0 ";
+            file << z + div;
+            file << "\n";
+
+            z += div;
+        }
+        z = -z1;
+        x += div;
+    }
+}
+
 int main(int argc, char **argv) {
     /*
     if (argc != 3) {
@@ -23,14 +85,11 @@ int main(int argc, char **argv) {
         printf("Error opening file");
         exit(-1);
     }
-
+    //filename = argv[4];
     if (strcmp(argv[1], "plane") == 0) {
-        file3d << "0 0 0\n";
-        file3d << "1 0 1\n";
-        file3d << "1 0 0\n";
-        file3d << "0 0 0\n";
-        file3d << "0 0 1\n";
-        file3d << "1 0 1\n";
+        printf("Length: %f\n", atof(argv[2]));
+        printf("Divisions: %f\n", atof(argv[3]));
+        drawPlane(atof(argv[2]),atof(argv[3]));
     }
     else if (strcmp(argv[1], "sphere")) {
 
