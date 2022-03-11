@@ -2,6 +2,7 @@
 #include <GLUT/glut.h>
 #else
 #include <GL/glut.h>
+#include "tinyxml.h"
 #endif
 #include "engine.h"
 #include <iostream>
@@ -11,8 +12,9 @@
 using namespace std;
 
 float cameraAngle = 0;
-float size = 1;
+float scale = 1;
 string file3D = "NaN";
+fstream openedFile;
 
 //Abre um ficheiro .3d e desenha
 void openFileAndDrawPoints (string filename){
@@ -38,7 +40,7 @@ void openFileAndDrawPoints (string filename){
 
         }
         glEnd();
-    }   else cout << "file not open\n";
+    }
 }
 
 void changeSize(int w, int h) {
@@ -97,7 +99,7 @@ void renderScene(void) {
               0.0,0.0,0.0,
               0.0f,1.0f,0.0f);
     glRotatef(cameraAngle,0,1,0);
-    glTranslatef(size,size,size);
+    glTranslatef(scale,scale,scale);
     openFileAndDrawPoints(file3D);
     drawAxis();
     // End of frame
@@ -115,16 +117,22 @@ void processSpecialKeys(int key, int xx, int yy) {
 
     switch (key) {
         case GLUT_KEY_UP:
-            size++;
+            scale++;
             break;
         case GLUT_KEY_DOWN:
-            size--;
+            scale--;
             break;
         case GLUT_KEY_RIGHT:
             cameraAngle += 5;
             break;
         case GLUT_KEY_LEFT:
             cameraAngle -= 5;
+            break;
+        case GLUT_KEY_F1:
+            glCullFace(GL_FRONT);
+            break;
+        case GLUT_KEY_F2:
+            glCullFace(GL_BACK);
             break;
     }
     glutPostRedisplay();
@@ -140,17 +148,27 @@ int main(int argc, char **argv) {
     }
     string xmlFile = argv[1];
     file3D = argv[2];
-    cout << "XML File: ";
-    cout << xmlFile;
-    cout << "\n3D file: ";
-    cout << file3D;
-    cout << "\n";
+    printf("XML File: %s\n",argv[1]);
+    openedFile.open(file3D);
+    if(openedFile.is_open()){
+        printf("3D file: %s\n",argv[2]);
+    }else{
+        printf("[Error] Can't open file: %s\n",argv[2]);
+        exit(-1);
+    }
+    /*
+    TiXmlDocument document(argv[1]);
+    document.LoadFile();
+    document.FirstChildElement("World");
+    */
 // init GLUT and the window
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DEPTH|GLUT_DOUBLE|GLUT_RGBA);
     glutInitWindowPosition(100,100);
     glutInitWindowSize(800,800);
-    glutCreateWindow("3D-Engine");
+    char* windowName = static_cast<char *>(malloc(sizeof(char) * 100));
+    sprintf(windowName,"#File: [%s]",argv[2]);
+    glutCreateWindow(windowName);
 
 // Required callback registry
     glutDisplayFunc(renderScene);
@@ -170,5 +188,10 @@ int main(int argc, char **argv) {
 
     return 1;
 }
-
-
+/*
+void readXMLConfigurationFile(char* filename){
+    TiXmlDocument doc(filename);
+    TiXmlHandle hdocument(&doc);
+    doc.RootElement()
+}
+*/
