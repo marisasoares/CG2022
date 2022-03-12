@@ -36,6 +36,8 @@ map<int,string> filesToDraw;
 
 CameraConfig cameraConfig;
 
+bool drawModeFill = false;
+
 void readXMLConfigurationFile(char* filename) {
     TiXmlDocument document;
     bool fileOpened = document.LoadFile(filename);
@@ -132,20 +134,21 @@ void openFileAndDrawPoints (string filename){
     file.open(filename,ios::in);
     if(file.is_open()){
         string line;
+        if(drawModeFill) glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+        else glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
         glBegin(GL_TRIANGLES);
         float point_x,point_y,point_z;
         int i = 0;
         float color = 0;
         while (getline(file,line)) {
             sscanf(line.c_str(),"%f %f %f",&point_x,&point_y,&point_z);
-            //cout << "Desenhado: ";
-            //cout << line;
-            //cout << "\n";
-            if(i % 3 == 0) {
+            if(drawModeFill){
+               if(i % 3 == 0) {
                 color == 0? color = 1: color = 0;
-            }
-            i++;
-            glColor3f(color, 1-color, 1-color);
+                }
+                i++;
+                glColor3f(color, 1-color, 1-color); 
+            } else glColor3f(1, 1, 1); 
             glVertex3f(point_x,point_y,point_z);
 
         }
@@ -205,13 +208,12 @@ void renderScene(void) {
 
     // set the camera
     glLoadIdentity();
+   
     gluLookAt(cameraConfig.cameraX,cameraConfig.cameraY,cameraConfig.cameraZ,
               cameraConfig.lookAtX,cameraConfig.lookAtY,cameraConfig.lookAtZ,
               cameraConfig.upX,cameraConfig.upY,cameraConfig.upZ);
-    
-    //gluPerspective(cameraConfig.fov,600*1/800,cameraConfig.near,cameraConfig.far);
-    glRotatef(cameraAngle,0,1,0);
-    glTranslatef(scale,scale,scale);
+    //gluPerspective(cameraConfig.fov,16/9,cameraConfig.near,cameraConfig.far);
+
     for(auto const &ent1 : filesToDraw) {
         openFileAndDrawPoints(ent1.second);
     }
@@ -247,6 +249,12 @@ void processSpecialKeys(int key, int xx, int yy) {
             break;
         case GLUT_KEY_F2:
             glCullFace(GL_BACK);
+            break;
+        case GLUT_KEY_F3:
+            drawModeFill = false;
+            break;
+        case GLUT_KEY_F4:
+            drawModeFill = true;
             break;
     }
     glutPostRedisplay();
