@@ -105,6 +105,60 @@ void createSphere(float radius, int slices, int stacks){
 }
 
 
+void createCone(float radius, float height, int slices, int stacks, string name) {
+    fstream file;
+    file.open(name,ios::out);
+
+    float theta = 0;
+    float nextTheta = 0;
+    float delta = (2 * M_PI) / slices;
+    float raio = radius / stacks;
+    float altura = height / stacks;
+    int i, j;
+
+    //fazer a circunferência da base
+    for (i = 0; i < slices; i++) {
+        nextTheta = theta + delta;
+
+        file << "0 0 0\n";
+        file << radius * sin(nextTheta) << " 0 " << radius * cos(nextTheta) << "\n";
+        file << radius * sin(theta) << " 0 " << radius * cos(theta) << "\n";
+
+        theta = nextTheta;
+    }// Fazer as laterais
+    float r1 = radius;
+    float r2 = radius - raio;
+    float alt1 = 0;
+    float alt2 = altura;
+    theta = 0;
+    nextTheta = 0;
+
+    for (i = 0; i < slices; i++) {
+        nextTheta += delta;
+
+        for (j = 0; j < stacks; j++) {
+            file << r1 * sin(nextTheta) <<" "<< alt1 <<" " << r1 * cos(nextTheta) << "\n";
+            file << r2 * sin(nextTheta) << " "<< alt2 << " " << r2 * cos(nextTheta) << "\n";
+            file << r1 * sin(theta) << " "<< alt1 << " " << r1 * cos(theta) << "\n";
+
+            file << r2 * sin(nextTheta) << " "<< alt2 << " " << r2 * cos(nextTheta) << "\n";
+            file << r2 * sin(theta) << " "<< alt2 << " " << r2 * cos(theta) << "\n";
+            file << r1 * sin(theta) << " "<< alt1 << " " << r1 * cos(theta) << "\n";
+
+            r1 -= raio;
+            r2 -= raio;
+            alt1 += altura;
+            alt2 += altura;
+        }
+        r1 = radius;
+        r2 = radius - raio;
+        alt1 = 0;
+        alt2 = altura;
+        theta = nextTheta;
+    }
+}
+
+
 void showSintaxError(){
     printf("Sintax error:\n");
     printf("   Usage: ./generator [Shape] [Args] [Output File]\n");
@@ -131,8 +185,8 @@ int main(int argc, char **argv) {
         if(argc != 6) showSintaxError();
         createSphere(atof(argv[2]),atof(argv[3]),atof(argv[4]));
     }
-    else if (strcmp(argv[1], "box") == 0) {
-
+    else if ((strcmp(argv[1], "cone") == 0) && (argc == 7)) {
+        createCone(atof(argv[2]),atof(argv[3]),stoi(argv[4]),stoi(argv[5]), argv[6]);
     }
     else if (strcmp(argv[1], "box") == 0) {
 
