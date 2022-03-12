@@ -8,13 +8,123 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <map>
 
 using namespace std;
 
 float cameraAngle = 0;
 float scale = 1;
-string file3D = "NaN";
 fstream openedFile;
+
+class CameraConfig{
+public:
+    float cameraX;
+    float cameraY;
+    float cameraZ;
+    float lookAtX;
+    float lookAtY;
+    float lookAtZ;
+    float upX;
+    float upY;
+    float upZ;
+    float fov;
+    float near;
+    float far;
+};
+
+map<int,string> filesToDraw;
+
+CameraConfig cameraConfig;
+
+void readXMLConfigurationFile(char* filename) {
+    TiXmlDocument document;
+    bool fileOpened = document.LoadFile(filename);
+    if(fileOpened){
+        TiXmlElement* root = document.RootElement();
+        int i = 0;
+        for (TiXmlElement* e = root->FirstChildElement("camera")->FirstChildElement(); e != NULL; e = e->NextSiblingElement())
+        {
+            if (e)
+            {
+                const char *a1 = e->Attribute("x");
+                const char *a2 = e->Attribute("y");
+                const char *a3 = e->Attribute("z");
+                const char *a4 = e->Attribute("fov");
+                const char *a5 = e->Attribute("near");
+                const char *a6 = e->Attribute("far");
+
+                //DEBUG
+                if (a1 && i == 0) {
+                    cout << "Position x: " << a1 << "\n";
+                    cameraConfig.cameraX = atof(a1);
+                }
+                if (a2 && i == 0) {
+                    cout << "Position y: " << a2 << "\n";
+                    cameraConfig.cameraY = atof(a2);
+
+                }
+                if (a3 && i == 0) {
+                    cout << "Position z: " << a3 << "\n";
+                    cameraConfig.cameraZ = atof(a3);
+                }
+                if (a1 && i == 1) {
+                    cout << "LookAt x: " << a1 << "\n";
+                    cameraConfig.lookAtX = atof(a1);
+                }
+                if (a2 && i == 1) {
+                    cout << "LookAt y: " << a2 << "\n";
+                    cameraConfig.lookAtY = atof(a2);
+
+                }
+                if (a3 && i == 1) {
+                    cout << "LookAt z: " << a3 << "\n";
+                    cameraConfig.lookAtZ = atof(a3);
+                }
+                if (a1 && i == 2) {
+                    cout << "Up x: " << a1 << "\n";
+                    cameraConfig.upX = atof(a1);
+                }
+                if (a2 && i == 2) {
+                    cout << "Up y: " << a2 << "\n";
+                    cameraConfig.upY = atof(a2);
+                }
+                if (a3 && i == 2) {
+                    cout << "Up z: " << a3 << "\n";
+                    cameraConfig.upZ = atof(a3);
+                }
+                if (a4){
+                    cout << "FOV: " << a4 << "\n";
+                    cameraConfig.fov = atof(a4);
+
+                }
+                if (a5) {
+                    cout << "Near: " << a5 << "\n";
+                    cameraConfig.near = atof(a5);
+                }
+                if (a6) {
+                    cout << "Far: " << a6 << "\n";
+                    cameraConfig.far = atof(a6);
+                }
+            }
+            i++;
+        }
+        i = 0;
+        for (TiXmlElement* e = root->FirstChildElement("group")->FirstChildElement("models")->FirstChildElement(); e != NULL; e = e->NextSiblingElement())
+        {
+            if (e)
+            {
+                const char *a1 = e->Attribute("file");
+
+                if (a1)
+                    cout << "Model file: " << a1 << "\n";
+                filesToDraw.insert(pair<int,string>(i,a1));
+            }
+            i++;
+        }
+    } else cout << "Error: Can't open XML File: " << filename;
+
+}
+
 
 //Abre um ficheiro .3d e desenha
 void openFileAndDrawPoints (string filename){
@@ -39,8 +149,9 @@ void openFileAndDrawPoints (string filename){
             glVertex3f(point_x,point_y,point_z);
 
         }
+        cout << "File drawn: [" << filename << "]\n";
         glEnd();
-    }
+    } else cout << "File not found: [" << filename << "]\n";
 }
 
 void changeSize(int w, int h) {
@@ -94,13 +205,16 @@ void renderScene(void) {
 
     // set the camera
     glLoadIdentity();
-
-    gluLookAt(5.0,5.0,5.0,
-              0.0,0.0,0.0,
-              0.0f,1.0f,0.0f);
+    gluLookAt(cameraConfig.cameraX,cameraConfig.cameraY,cameraConfig.cameraZ,
+              cameraConfig.lookAtX,cameraConfig.lookAtY,cameraConfig.lookAtZ,
+              cameraConfig.upX,cameraConfig.upY,cameraConfig.upZ);
+    
+    //gluPerspective(cameraConfig.fov,600*1/800,cameraConfig.near,cameraConfig.far);
     glRotatef(cameraAngle,0,1,0);
     glTranslatef(scale,scale,scale);
-    openFileAndDrawPoints(file3D);
+    for(auto const &ent1 : filesToDraw) {
+        openFileAndDrawPoints(ent1.second);
+    }
     drawAxis();
     // End of frame
     glutSwapBuffers();
@@ -143,31 +257,19 @@ int main(int argc, char **argv) {
     if(argc != 3){
         //TO DO open xml
         cout << "Sintax error:\n";
-        cout << "   Usage: ./Engine [XML configuration file] [3d file to open]\n";
+        cout << "   Usage: ./Engine [XML configuration file]\n";
         exit(-1);
     }
     string xmlFile = argv[1];
-    file3D = argv[2];
     printf("XML File: %s\n",argv[1]);
-    openedFile.open(file3D);
-    if(openedFile.is_open()){
-        printf("3D file: %s\n",argv[2]);
-    }else{
-        printf("[Error] Can't open file: %s\n",argv[2]);
-        exit(-1);
-    }
-    /*
-    TiXmlDocument document(argv[1]);
-    document.LoadFile();
-    document.FirstChildElement("World");
-    */
+    readXMLConfigurationFile(argv[1]);
 // init GLUT and the window
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DEPTH|GLUT_DOUBLE|GLUT_RGBA);
     glutInitWindowPosition(100,100);
     glutInitWindowSize(800,800);
     char* windowName = static_cast<char *>(malloc(sizeof(char) * 100));
-    sprintf(windowName,"#File: [%s]",argv[2]);
+    sprintf(windowName,"File: [%s]",argv[1]);
     glutCreateWindow(windowName);
 
 // Required callback registry
@@ -188,10 +290,4 @@ int main(int argc, char **argv) {
 
     return 1;
 }
-/*
-void readXMLConfigurationFile(char* filename){
-    TiXmlDocument doc(filename);
-    TiXmlHandle hdocument(&doc);
-    doc.RootElement()
-}
-*/
+
