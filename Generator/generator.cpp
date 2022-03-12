@@ -183,7 +183,8 @@ int main(int argc, char **argv) {
         filename = argv[5];
         createSphere(atof(argv[2]),atof(argv[3]),atof(argv[4]));
     }
-    else if ((strcmp(argv[1], "cone") == 0) && (argc == 7)) {
+    else if ((strcmp(argv[1], "cone") == 0)) {
+        if(argc != 7) showSintaxError();
         createCone(atof(argv[2]),atof(argv[3]),stoi(argv[4]),stoi(argv[5]), argv[6]);
     }
     else if (strcmp(argv[1], "box") == 0) {
