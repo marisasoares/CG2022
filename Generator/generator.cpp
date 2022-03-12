@@ -25,7 +25,7 @@ void drawPlane(float length, int divisions) {
     float z = -z1;
 
     fstream file;
-    file.open("plane.3d",ios::out);
+    file.open(filename,ios::out);
     //char* string = malloc(sizeof(char) * 20);
     string coord;
 
@@ -78,7 +78,7 @@ void createSphere(float radius, int slices, int stacks){
     float delta1 = M_PI / stacks;
     float delta2 = 2 * M_PI / slices;
     fstream file;
-    file.open("sphere.3d",ios::out);
+    file.open(filename,ios::out);
 
     for (float i = -M_PI / 2; i < M_PI / 2; i += delta1) {
 
@@ -117,18 +117,16 @@ void showSintaxError(){
 }
 
 int main(int argc, char **argv) {
-    printf("argc: %d\n" , argc);
     if(argc == 1) showSintaxError();
 
     if (strcmp(argv[1], "plane") == 0) {
+        filename = argv[4];
         if(argc != 5) showSintaxError();
-        printf("Length: %f\n", atof(argv[2]));
-        printf("Divisions: %f\n", atof(argv[3]));
         drawPlane(atof(argv[2]),atof(argv[3]));
     }
     else if (strcmp(argv[1], "sphere") == 0) {
-        printf("esfera");
         if(argc != 6) showSintaxError();
+        filename = argv[5];
         createSphere(atof(argv[2]),atof(argv[3]),atof(argv[4]));
     }
     else if (strcmp(argv[1], "box") == 0) {
