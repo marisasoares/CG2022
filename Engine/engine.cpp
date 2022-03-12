@@ -255,7 +255,7 @@ void processSpecialKeys(int key, int xx, int yy) {
 
 int main(int argc, char **argv) {
     if(argc != 2){
-        cout << "Sintax error:\n";
+        cout << "Sintax error: \n";
         cout << "   Usage: ./Engine [XML configuration file]\n";
         exit(-1);
     }
