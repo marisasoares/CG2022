@@ -13,6 +13,281 @@ using namespace std;
 
 string filename;
 
+void drawBox(float x, float y, float z, int slices) {
+    float x1 = x / 2;
+    float z1 = z / 2;
+    float slicesX = x / slices;
+    float slicesY = y / slices;
+    float slicesZ = z / slices;
+    int i, j;
+
+	fstream file;
+	file.open(filename, ios::out);
+
+    // Desenhar a base
+    float auxX = -x1;
+    float auxZ = -z1;
+    for (i = 0; i < slices; i++) {
+        for (j = 0; j < slices; j++) {
+
+			file << auxX<< " ";
+			file << 0<< " ";
+			file << auxZ<< " ";
+            file << "\n";
+
+			file << auxX + slicesX<< " ";
+			file << 0<< " ";
+			file << auxZ<< " ";
+            file << "\n";
+
+			file << auxX + slicesX<< " ";
+			file << 0<< " ";
+			file << auxZ + slicesZ<< " ";
+            file << "\n";
+
+			//2ºtriangulo 
+			file << auxX + slicesX<< " ";
+			file << 0<< " ";
+			file << auxZ + slicesZ<< " ";
+            file << "\n";
+
+			file << auxX << " ";
+			file << 0<< " ";
+			file << auxZ + slicesZ<< " ";
+            file << "\n";
+
+			file << auxX<< " ";
+			file << 0<< " ";
+			file << auxZ<< " ";
+            file << "\n";
+
+            auxZ += slicesZ;
+        }
+        auxZ = -z1;
+        auxX += slicesX;
+    }
+    // Desenhar o teto
+    auxX = -x1;
+    auxZ = -z1;
+    float auxY = y;
+    for (i = 0; i < slices; i++) {
+        for (j = 0; j < slices; j++) {
+
+
+            file << auxX + slicesX << " ";
+            file << auxY << " ";
+            file << auxZ + slicesZ << " ";
+            file << "\n";
+
+            file << auxX + slicesX << " ";
+            file << auxY << " ";
+            file << auxZ << " ";
+            file << "\n";
+
+            file << auxX << " ";
+            file << auxY << " ";
+            file << auxZ << " ";
+            file << "\n";
+
+
+            file << auxX << " ";
+            file << auxY << " ";
+            file << auxZ << " ";
+            file << "\n";
+
+            file << auxX << " ";
+            file << auxY << " ";
+            file << auxZ + slicesZ << " ";
+            file << "\n";
+
+            file << auxX + slicesX << " ";
+            file << auxY << " ";
+            file << auxZ + slicesZ << " ";
+            file << "\n";
+
+            auxZ += slicesZ;
+        }
+        auxZ = -z1;
+        auxX += slicesX;
+    }
+
+    // Desenhar o lado direito
+    auxX = x1;
+    auxZ = z1;
+    auxY = y;
+    for (i = 0; i < slices; i++) {
+        for (j = 0; j < slices; j++) {
+
+
+            file << auxX << " ";
+            file << auxY << " ";
+            file << auxZ << " ";
+            file << "\n";
+
+            file << auxX << " ";
+            file << auxY - slicesY << " ";
+            file << auxZ << " ";
+            file << "\n";
+
+            file << auxX << " ";
+            file << auxY - slicesY << " ";
+            file << auxZ - slicesZ << " ";
+            file << "\n";
+
+
+            file << auxX << " ";
+            file << auxY - slicesY << " ";
+            file << auxZ - slicesZ << " ";
+            file << "\n";
+
+            file << auxX << " ";
+            file << auxY << " ";
+            file << auxZ - slicesZ << " ";
+            file << "\n";
+
+            file << auxX << " ";
+            file << auxY << " ";
+            file << auxZ << " ";
+            file << "\n";
+
+            auxZ -= slicesZ;
+        }
+        auxZ = z1;
+        auxY -= slicesY;
+    }
+
+    // Desenhar o lado esquerdo
+    auxX = -x1;
+    auxZ = -z1;
+    auxY = y;
+    for (i = 0; i < slices; i++) {
+        for (j = 0; j < slices; j++) {
+
+            file << auxX << " ";
+            file << auxY << " ";
+            file << auxZ << " ";
+            file << "\n";
+
+            file << auxX << " ";
+            file << auxY - slicesY << " ";
+            file << auxZ << " ";
+            file << "\n";
+
+            file << auxX << " ";
+            file << auxY - slicesY << " ";
+            file << auxZ + slicesZ;
+            file << "\n";
+
+            file << auxX<< " ";
+            file << auxY - slicesY<< " ";
+            file << auxZ + slicesZ<< " ";
+            file << "\n";
+
+            file << auxX<< " ";
+            file << auxY<< " ";
+            file << auxZ + slicesZ<< " ";
+            file << "\n";
+
+            file << auxX<< " ";
+            file << auxY<< " ";
+            file << auxZ<< " ";
+            file << "\n";
+
+            auxZ += slicesZ;
+        }
+        auxZ = -z1;
+        auxY -= slicesY;
+    }
+
+    // Desenhar frente
+    auxX = -x1;
+    auxZ = z1;
+    auxY = y;
+    for (i = 0; i < slices; i++) {
+        for (j = 0; j < slices; j++) {
+
+            file << auxX << " ";
+            file << auxY<< " ";
+            file << auxZ<< " ";
+            file << "\n";
+
+            file << auxX<< " ";
+            file << auxY - slicesY<< " ";
+            file << auxZ<< " ";
+            file << "\n";
+
+            file << auxX + slicesX<< " ";
+            file << auxY - slicesY<< " ";
+            file << auxZ<< " ";
+            file << "\n";
+
+
+            file << auxX + slicesX<< " ";
+            file << auxY - slicesY<< " ";
+            file << auxZ<< " ";
+            file << "\n";
+
+            file << auxX + slicesX<< " ";
+            file << auxY<< " ";
+            file << auxZ<< " ";
+            file << "\n";
+
+            file << auxX<< " ";
+            file << auxY<< " ";
+            file << auxZ<< " ";
+            file << "\n";
+
+            auxX += slicesX;
+        }
+        auxX = -x1;
+        auxY -= slicesY;
+    }
+
+    // Desenhar trás
+    auxX = x1;
+    auxZ = -z1;
+    auxY = y;
+    for (i = 0; i < slices; i++) {
+        for (j = 0; j < slices; j++) {
+
+            file << auxX<< " ";
+            file << auxY<< " ";
+            file << auxZ<< " ";
+            file << "\n";
+
+            file << auxX<< " ";
+            file << auxY - slicesY<< " ";
+            file << auxZ<< " ";
+            file << "\n";
+
+            file << auxX - slicesX<< " ";
+            file << auxY - slicesY<< " ";
+            file << auxZ<< " ";
+            file << "\n";
+
+            file << auxX - slicesX<< " ";
+            file << auxY - slicesY<< " ";
+            file << auxZ<< " ";
+            file << "\n";
+
+            file << auxX - slicesX<< " ";
+            file << auxY<< " ";
+            file << auxZ<< " ";
+            file << "\n";
+
+            file << auxX<< " ";
+            file << auxY<< " ";
+            file << auxZ<< " ";
+            file << "\n";
+
+            auxX -= slicesX;
+        }
+        auxX = x1;
+        auxY -= slicesY;
+    }
+
+}
+
 void drawPlane(float length, int divisions) {
 
     float x1 = length / 2;
@@ -184,10 +459,13 @@ int main(int argc, char **argv) {
         createSphere(atof(argv[2]),atof(argv[3]),atof(argv[4]));
     }
     else if ((strcmp(argv[1], "cone") == 0)) {
-        if(argc != 7) showSintaxError();
+        if(argc != 8) showSintaxError();
         createCone(atof(argv[2]),atof(argv[3]),stoi(argv[4]),stoi(argv[5]), argv[6]);
     }
     else if (strcmp(argv[1], "box") == 0) {
+        if(argc != 5) showSintaxError();
+        filename = argv[4];
+        drawBox(atof(argv[2]),atof(argv[2]),atof(argv[2]),atoi(argv[3]));
 
     }
     else showSintaxError();

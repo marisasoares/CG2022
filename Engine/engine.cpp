@@ -9,11 +9,14 @@
 #include <fstream>
 #include <sstream>
 #include <map>
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 using namespace std;
 
 float cameraAngle = 0;
-float scale = 1;
+float cameraDistance = 0;
+float scale = 0;
 fstream openedFile;
 
 class CameraConfig{
@@ -123,7 +126,7 @@ void readXMLConfigurationFile(char* filename) {
             }
             i++;
         }
-    } else cout << "Error: Can't open XML File: " << filename;
+    } else cout << "Error: Can't open XML File: " << filename << "\n";
 
 }
 
@@ -212,9 +215,11 @@ void renderScene(void) {
     gluLookAt(cameraConfig.cameraX,cameraConfig.cameraY,cameraConfig.cameraZ,
               cameraConfig.lookAtX,cameraConfig.lookAtY,cameraConfig.lookAtZ,
               cameraConfig.upX,cameraConfig.upY,cameraConfig.upZ);
-    //gluPerspective(cameraConfig.fov,16/9,cameraConfig.near,cameraConfig.far);
+    glTranslatef(scale,scale,scale); 
+    glRotatef(cameraAngle,0,1,0);
+    //gluPerspective(cameraConfig.fov,400/400,cameraConfig.near,cameraConfig.far);
 
-    for(auto const &ent1 : filesToDraw) {
+    for(auto const &ent1 :  filesToDraw) {
         openFileAndDrawPoints(ent1.second);
     }
     drawAxis();
@@ -233,10 +238,10 @@ void processSpecialKeys(int key, int xx, int yy) {
 
     switch (key) {
         case GLUT_KEY_UP:
-            scale++;
+            scale+= 0.5;
             break;
         case GLUT_KEY_DOWN:
-            scale--;
+            scale-= 0.5;
             break;
         case GLUT_KEY_RIGHT:
             cameraAngle += 5;
@@ -270,6 +275,8 @@ int main(int argc, char **argv) {
     string xmlFile = argv[1];
     printf("XML File: %s\n",argv[1]);
     readXMLConfigurationFile(argv[1]);
+    cameraDistance = sqrt((cameraConfig.cameraX)*(cameraConfig.cameraX) + (cameraConfig.cameraY)*(cameraConfig.cameraY) + (cameraConfig.cameraZ)*(cameraConfig.cameraZ));
+    
 // init GLUT and the window
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DEPTH|GLUT_DOUBLE|GLUT_RGBA);
