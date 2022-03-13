@@ -348,35 +348,54 @@ void drawPlane(float length, int divisions) {
     }
 }
 
-void createSphere(float radius, int slices, int stacks){
-    
-    float delta1 = M_PI / stacks;
-    float delta2 = 2 * M_PI / slices;
-    fstream file;
-    file.open(filename,ios::out);
+void createSphere(float raio, int stacks, int slices) {
 
-    for (float i = -M_PI / 2; i < M_PI / 2; i += delta1) {
+        float delta1 = 2 * M_PI / stacks;
+        float delta2 = M_PI / slices;
 
-        float aux1 = i + delta1;
+        fstream file;
+        file.open(filename);
+        float x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4;
+        float a, aux = 0;
+
+        for (int i = 0 ; i < slices ; i ++) {
+
+            a = 0;
+
+            for (int j = 0 ; j < stacks ; j++){
+
+            x1 = raio * sin(aux) * sin(a);
+            y1 = raio * cos(aux);
+            z1 = raio * sin(aux) * cos(a);
+
+            x2 = raio * sin(aux + delta2) * sin(a + delta1);
+            y2 = raio * cos(aux + delta2);
+            z2 = raio * sin(aux + delta2) * cos(a + delta1);
+
+            x3 = raio * sin(aux + delta2) * sin(a);
+            y3 = raio * cos(aux + delta2);
+            z3 = raio * sin(aux + delta2) * cos(a);
+
+            x4 = raio * sin(aux) * sin(a + delta1);
+            y4 = raio * cos(aux);
+            z4 = raio * sin(aux) * cos(a + delta1);
 
 
-        for (float j = 0; j < 2 * M_PI - delta2; j += delta2) {
+            file << x1 << " " << y1 << " " << z1 << endl;
+            file << x3 << " " << y3 << " " << z3 << endl;
+            file << x2 << " " << y2 << " " << z2 << endl;
 
-            float aux2 = j + delta2;
+            file << x1 << " " << y1 << " " << z1 << endl;
+            file << x2 << " " << y2 << " " << z2 << endl;
+            file << x4 << " " << y4 << " " << z4 << endl;
 
-            //Triângulo 1
 
-            file << (cos(aux1) * sin(j) * radius) << " " << sin(aux1) * radius << "" << cos(aux1)* cos(j)* radius << "\n";
-            file << cos(i) * sin(j) * radius << " " << sin(i) * radius << " " << cos(i) * cos(j) * radius << "\n";
-            file << cos(i) * sin(aux2) * radius << " " << sin(i) * radius << " " << cos(i) * cos(aux2) * radius << "\n";
+            a += delta1;
 
-            //Triângulo 2
-            file << cos(aux1) * sin(j) * radius << " " << sin(aux1) * radius << " " << cos(aux1)* cos(j)* radius << "\n";
-            file << cos(i) * sin(aux2) * radius << " " << sin(i) * radius << " " << cos(i)* cos(aux2)* radius << "\n";
-            file << cos(aux1) * sin(aux2) * radius << " " << sin(aux1) * radius << " " << cos(aux1)* cos(aux2)* radius << "\n";
+            }
 
+            aux += delta2;
         }
-    }
 }
 
 
@@ -440,7 +459,7 @@ void showSintaxError(){
     printf(" Shapes available: \n");
     printf("    Plane: [length] [divisions]\n");
     printf("    Box: [size] [divisions]\n");
-    printf("    Sphere: [radious] [height]\n");
+    printf("    Sphere: [radious] [slices] [height]\n");
     printf("    Cone: [radious] [heigth] [Slices] [stacks]\n");
     exit(-1);
 }
