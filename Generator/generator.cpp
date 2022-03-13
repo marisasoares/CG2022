@@ -380,9 +380,9 @@ void createSphere(float radius, int slices, int stacks){
 }
 
 
-void createCone(float radius, float height, int slices, int stacks, string name) {
+void createCone(float radius, float height, int slices, int stacks) {
     fstream file;
-    file.open(name,ios::out);
+    file.open(filename,ios::out);
 
     float theta = 0;
     float nextTheta = 0;
@@ -459,8 +459,9 @@ int main(int argc, char **argv) {
         createSphere(atof(argv[2]),atof(argv[3]),atof(argv[4]));
     }
     else if ((strcmp(argv[1], "cone") == 0)) {
-        if(argc != 8) showSintaxError();
-        createCone(atof(argv[2]),atof(argv[3]),stoi(argv[4]),stoi(argv[5]), argv[6]);
+        if(argc != 7) showSintaxError();
+        filename = argv[6];
+        createCone(atof(argv[2]),atof(argv[3]),atoi(argv[4]),atoi(argv[5]));
     }
     else if (strcmp(argv[1], "box") == 0) {
         if(argc != 5) showSintaxError();
