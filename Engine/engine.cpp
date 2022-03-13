@@ -11,14 +11,20 @@
 #include <map>
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <list>
 
 using namespace std;
 
+//Angulo da camera
 float cameraAngle = 0;
-float cameraDistance = 0;
+//Escala do viewport
 float scale = 0;
+//distância da camera à origem
+float cameraDistance = 0;
+//Ficheiro XML aberto no momento
 fstream openedFile;
 
+//Classe de configuração da camera
 class CameraConfig{
 public:
     float cameraX;
@@ -35,12 +41,77 @@ public:
     float far;
 };
 
-map<int,string> filesToDraw;
+//Ponto no espaço
+class Point{
+    public:
+    float x;
+    float y;
+    float z;
+};
 
-CameraConfig cameraConfig;
-
+//Modo de desenho
 bool drawModeFill = false;
 
+//Modelo carregado de ficheiros .3d
+class Model {
+    public:
+        list<Point> points;
+    void drawModel(){
+        int i = 0;
+        float color = 0;
+        for(Point point: points){
+            string line;
+            //Togle between wireframe and fill
+            if(drawModeFill) glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+            else glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+            //Draw model
+            glBegin(GL_TRIANGLES);
+            //Define color if in fill mode or white if wireframe
+            if(drawModeFill){
+               if(i % 3 == 0) {
+                color == 0? color = 1: color = 0;
+                }
+                i++;
+                glColor3f(color, 1-color, 1-color); 
+            } else glColor3f(1, 1, 1);
+            //Draw vertex 
+            glVertex3f(point.x,point.y,point.z);
+        }
+        glEnd();
+    }
+};
+
+//Modelos lidos do ficheiro XML
+map<int,Model> modelsToDraw;
+
+//Configuração da camera atual
+CameraConfig cameraConfig;
+
+
+//Abre um ficheiro .3d e carrega-o para memória
+Model openFileAndLoadModel (string filename){
+    fstream file;
+    file.open(filename,ios::in);
+    Model model;
+    if(file.is_open()){
+        string line;
+        float point_x,point_y,point_z;
+        int i = 0;
+        float color = 0;
+        while (getline(file,line)) {
+            sscanf(line.c_str(),"%f %f %f",&point_x,&point_y,&point_z);
+            Point point;
+            point.x = point_x;
+            point.y = point_y;
+            point.z = point_z;
+            model.points.insert(model.points.end(),point);
+        }
+        cout << "File drawn: [" << filename << "]\n";
+    } else cout << "File not found: [" << filename << "]\n";
+    return model;
+}
+
+//Ler o ficheiro XML e carregar os modelos
 void readXMLConfigurationFile(char* filename) {
     TiXmlDocument document;
     bool fileOpened = document.LoadFile(filename);
@@ -122,7 +193,8 @@ void readXMLConfigurationFile(char* filename) {
 
                 if (a1)
                     cout << "Model file: " << a1 << "\n";
-                filesToDraw.insert(pair<int,string>(i,a1));
+                    Model model = openFileAndLoadModel(a1);
+                    modelsToDraw.insert(pair<int,Model>(i,model));
             }
             i++;
         }
@@ -130,36 +202,7 @@ void readXMLConfigurationFile(char* filename) {
 
 }
 
-
-//Abre um ficheiro .3d e desenha
-void openFileAndDrawPoints (string filename){
-    fstream file;
-    file.open(filename,ios::in);
-    if(file.is_open()){
-        string line;
-        if(drawModeFill) glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-        else glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-        glBegin(GL_TRIANGLES);
-        float point_x,point_y,point_z;
-        int i = 0;
-        float color = 0;
-        while (getline(file,line)) {
-            sscanf(line.c_str(),"%f %f %f",&point_x,&point_y,&point_z);
-            if(drawModeFill){
-               if(i % 3 == 0) {
-                color == 0? color = 1: color = 0;
-                }
-                i++;
-                glColor3f(color, 1-color, 1-color); 
-            } else glColor3f(1, 1, 1); 
-            glVertex3f(point_x,point_y,point_z);
-
-        }
-        cout << "File drawn: [" << filename << "]\n";
-        glEnd();
-    } else cout << "File not found: [" << filename << "]\n";
-}
-
+//Redimensionar janela
 void changeSize(int w, int h) {
 
     // Prevent a divide by zero, when window is too short
@@ -186,19 +229,20 @@ void changeSize(int w, int h) {
 }
 
 
+//Desenhar os eixos XYZ
 void drawAxis(){
     glBegin(GL_LINES);
     //X Axis
     glColor3f(1.0f, 0.0f, 0.0f);
-    glVertex3f(-10.0f, 0.0f, 0.0f);
+    glVertex3f(-100.0f, 0.0f, 0.0f);
     glVertex3f( 10.0f, 0.0f, 0.0f);
     //Y Axis
     glColor3f(0.0f, 1.0f, 0.0f);
-    glVertex3f(0.0f, -10.0f, 0.0f);
+    glVertex3f(0.0f, -100.0f, 0.0f);
     glVertex3f(0.0f, 10.0f, 0.0f);
     // Z Axis
     glColor3f(0.0f, 0.0f, 1.0f);
-    glVertex3f(0.0f, 0.0f, -10.0f);
+    glVertex3f(0.0f, 0.0f, -100.0f);
     glVertex3f(0.0f, 0.0f, 10.0f);
     glEnd();
 
@@ -215,12 +259,13 @@ void renderScene(void) {
     gluLookAt(cameraConfig.cameraX,cameraConfig.cameraY,cameraConfig.cameraZ,
               cameraConfig.lookAtX,cameraConfig.lookAtY,cameraConfig.lookAtZ,
               cameraConfig.upX,cameraConfig.upY,cameraConfig.upZ);
+    
     glTranslatef(scale,scale,scale); 
     glRotatef(cameraAngle,0,1,0);
     //gluPerspective(cameraConfig.fov,400/400,cameraConfig.near,cameraConfig.far);
 
-    for(auto const &ent1 :  filesToDraw) {
-        openFileAndDrawPoints(ent1.second);
+    for(auto &ent1 :  modelsToDraw) {
+        ent1.second.drawModel();
     }
     drawAxis();
     // End of frame
@@ -275,7 +320,8 @@ int main(int argc, char **argv) {
     string xmlFile = argv[1];
     printf("XML File: %s\n",argv[1]);
     readXMLConfigurationFile(argv[1]);
-    cameraDistance = sqrt((cameraConfig.cameraX)*(cameraConfig.cameraX) + (cameraConfig.cameraY)*(cameraConfig.cameraY) + (cameraConfig.cameraZ)*(cameraConfig.cameraZ));
+    //distância da camera à origem
+    //cameraDistance = sqrt((cameraConfig.cameraX)*(cameraConfig.cameraX) + (cameraConfig.cameraY)*(cameraConfig.cameraY) + (cameraConfig.cameraZ)*(cameraConfig.cameraZ));
     
 // init GLUT and the window
     glutInit(&argc, argv);
