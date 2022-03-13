@@ -19,17 +19,16 @@ void drawBox(float x, float y, float z, int slices) {
     float slicesX = x / slices;
     float slicesY = y / slices;
     float slicesZ = z / slices;
-    int i, j;
 
 	fstream file;
 	file.open(filename, ios::out);
 
-    // Desenhar a base
+    // Base
     float auxX = -x1;
     float auxZ = -z1;
-    for (i = 0; i < slices; i++) {
-        for (j = 0; j < slices; j++) {
-
+    for (int i = 0; i < slices; i++) {
+        for (int j = 0; j < slices; j++) {
+            //1ºtriangulo 
 			file << auxX<< " ";
 			file << 0<< " ";
 			file << auxZ<< " ";
@@ -66,12 +65,12 @@ void drawBox(float x, float y, float z, int slices) {
         auxZ = -z1;
         auxX += slicesX;
     }
-    // Desenhar o teto
+    // Cima
     auxX = -x1;
     auxZ = -z1;
     float auxY = y;
-    for (i = 0; i < slices; i++) {
-        for (j = 0; j < slices; j++) {
+    for (int i = 0; i < slices; i++) {
+        for (int j = 0; j < slices; j++) {
 
 
             file << auxX + slicesX << " ";
@@ -111,12 +110,12 @@ void drawBox(float x, float y, float z, int slices) {
         auxX += slicesX;
     }
 
-    // Desenhar o lado direito
+    // Lado direito
     auxX = x1;
     auxZ = z1;
     auxY = y;
-    for (i = 0; i < slices; i++) {
-        for (j = 0; j < slices; j++) {
+    for (int i = 0; i < slices; i++) {
+        for (int j = 0; j < slices; j++) {
 
 
             file << auxX << " ";
@@ -156,12 +155,12 @@ void drawBox(float x, float y, float z, int slices) {
         auxY -= slicesY;
     }
 
-    // Desenhar o lado esquerdo
+    // Lado Esquerdo
     auxX = -x1;
     auxZ = -z1;
     auxY = y;
-    for (i = 0; i < slices; i++) {
-        for (j = 0; j < slices; j++) {
+    for (int i = 0; i < slices; i++) {
+        for (int j = 0; j < slices; j++) {
 
             file << auxX << " ";
             file << auxY << " ";
@@ -199,12 +198,12 @@ void drawBox(float x, float y, float z, int slices) {
         auxY -= slicesY;
     }
 
-    // Desenhar frente
+    // Frente
     auxX = -x1;
     auxZ = z1;
     auxY = y;
-    for (i = 0; i < slices; i++) {
-        for (j = 0; j < slices; j++) {
+    for (int i = 0; i < slices; i++) {
+        for (int j = 0; j < slices; j++) {
 
             file << auxX << " ";
             file << auxY<< " ";
@@ -243,12 +242,12 @@ void drawBox(float x, float y, float z, int slices) {
         auxY -= slicesY;
     }
 
-    // Desenhar trás
+    // Trás
     auxX = x1;
     auxZ = -z1;
     auxY = y;
-    for (i = 0; i < slices; i++) {
-        for (j = 0; j < slices; j++) {
+    for (int i = 0; i < slices; i++) {
+        for (int j = 0; j < slices; j++) {
 
             file << auxX<< " ";
             file << auxY<< " ";
@@ -301,7 +300,6 @@ void drawPlane(float length, int divisions) {
 
     fstream file;
     file.open(filename,ios::out);
-    //char* string = malloc(sizeof(char) * 20);
     string coord;
 
 
