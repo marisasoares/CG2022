@@ -1,13 +1,19 @@
 cmake_minimum_required(VERSION 3.21)
-project(generator)
+project(../Generator/generator)
 
 set(CMAKE_CXX_STANDARD 14)
 
 include_directories(..)
 
-add_executable(generator
-        generator.h
-        generator.cpp)
+add_executable(engine
+        engine.h
+        engine.cpp
+        tinystr.cpp
+        tinystr.h
+        tinyxml.cpp
+        tinyxml.h
+        tinyxmlerror.cpp
+        tinyxmlparser.cpp)
 
 find_package(OpenGL REQUIRED)
 include_directories(${OpenGL_INCLUDE_DIRS})

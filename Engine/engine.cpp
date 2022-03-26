@@ -15,14 +15,15 @@
 
 using namespace std;
 
-//Angulo da camera
-float cameraAngle = 0;
-//Escala do viewport
-float scale = 0;
 //distância da camera à origem
 float cameraDistance = 0;
 //Ficheiro XML aberto no momento
 fstream openedFile;
+
+// Angulos da camera
+float alpha_angle,beta_angle = 0.5;
+// Distância à origem
+float distance_Origin = 0;
 
 //Classe de configuração da camera
 class CameraConfig{
@@ -222,7 +223,7 @@ void changeSize(int w, int h) {
     glViewport(0, 0, w, h);
 
     // Set perspective
-    gluPerspective(45.0f ,ratio, 1.0f ,1000.0f);
+    gluPerspective(cameraConfig.fov ,ratio, cameraConfig.near ,cameraConfig.far);
 
     // return to the model view matrix mode
     glMatrixMode(GL_MODELVIEW);
@@ -259,9 +260,7 @@ void renderScene(void) {
     gluLookAt(cameraConfig.cameraX,cameraConfig.cameraY,cameraConfig.cameraZ,
               cameraConfig.lookAtX,cameraConfig.lookAtY,cameraConfig.lookAtZ,
               cameraConfig.upX,cameraConfig.upY,cameraConfig.upZ);
-    
-    glTranslatef(scale,scale,scale); 
-    glRotatef(cameraAngle,0,1,0);
+
     //gluPerspective(cameraConfig.fov,400/400,cameraConfig.near,cameraConfig.far);
 
     for(auto &ent1 :  modelsToDraw) {
@@ -282,18 +281,31 @@ void processKeys(unsigned char c, int xx, int yy) {
 void processSpecialKeys(int key, int xx, int yy) {
 
     switch (key) {
-        case GLUT_KEY_UP:
-            scale+= 0.5;
-            break;
-        case GLUT_KEY_DOWN:
-            scale-= 0.5;
-            break;
         case GLUT_KEY_RIGHT:
-            cameraAngle += 5;
-            break;
+            alpha_angle -= 0.1; break;
+
         case GLUT_KEY_LEFT:
-            cameraAngle -= 5;
+            alpha_angle += 0.1; break;
+
+        case GLUT_KEY_UP:
+            beta_angle += 0.01f;
+            if (beta_angle > 1.5f)
+                beta_angle = 1.5f;
             break;
+
+        case GLUT_KEY_DOWN:
+            beta_angle -= 0.01f;
+            if (beta_angle < -1.5f)
+                beta_angle = -1.5f;
+            break;
+
+        case GLUT_KEY_PAGE_DOWN: distance_Origin -= 0.5f;
+            if (distance_Origin < 1.0f)
+                distance_Origin = 1.0f;
+            break;
+
+        case GLUT_KEY_PAGE_UP: distance_Origin += 0.5f; break;
+
         case GLUT_KEY_F1:
             glCullFace(GL_FRONT);
             break;
@@ -307,7 +319,10 @@ void processSpecialKeys(int key, int xx, int yy) {
             drawModeFill = true;
             break;
     }
-    glutPostRedisplay();
+    cameraConfig.cameraX = distance_Origin * cos(beta_angle) * sin(alpha_angle);
+    cameraConfig.cameraY = distance_Origin * sin(beta_angle);
+    cameraConfig.cameraZ = distance_Origin * cos(beta_angle) * cos(alpha_angle);
+            glutPostRedisplay();
 
 }
 
@@ -321,7 +336,7 @@ int main(int argc, char **argv) {
     printf("XML File: %s\n",argv[1]);
     readXMLConfigurationFile(argv[1]);
     //distância da camera à origem
-    //cameraDistance = sqrt((cameraConfig.cameraX)*(cameraConfig.cameraX) + (cameraConfig.cameraY)*(cameraConfig.cameraY) + (cameraConfig.cameraZ)*(cameraConfig.cameraZ));
+    distance_Origin = sqrt((cameraConfig.cameraX)*(cameraConfig.cameraX) + (cameraConfig.cameraY)*(cameraConfig.cameraY) + (cameraConfig.cameraZ)*(cameraConfig.cameraZ));
     
 // init GLUT and the window
     glutInit(&argc, argv);
