@@ -2,95 +2,71 @@
 #include <GLUT/glut.h>
 #else
 #include <GL/glut.h>
-#include "tinyxml.h"
 #endif
-#include "engine.h"
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <map>
 #define _USE_MATH_DEFINES
-#include <math.h>
-#include <list>
+#include "engine.h"
+
 
 using namespace std;
 
-//distância da camera à origem
-float cameraDistance = 0;
-//Ficheiro XML aberto no momento
-fstream openedFile;
-
 // Angulos da camera
 float alpha_angle,beta_angle = 0.5;
+
 // Distância à origem
 float distance_Origin = 0;
-
-//Classe de configuração da camera
-class CameraConfig{
-public:
-    float cameraX;
-    float cameraY;
-    float cameraZ;
-    float lookAtX;
-    float lookAtY;
-    float lookAtZ;
-    float upX;
-    float upY;
-    float upZ;
-    float fov;
-    float near;
-    float far;
-};
-
-//Ponto no espaço
-class Point{
-    public:
-    float x;
-    float y;
-    float z;
-};
 
 //Modo de desenho
 bool drawModeFill = false;
 
-//Modelo carregado de ficheiros .3d
-class Model {
-    public:
-        list<Point> points;
-    void drawModel(){
-        int i = 0;
-        float color = 0;
-        for(Point point: points){
-            string line;
-            //Togle between wireframe and fill
-            if(drawModeFill) glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-            else glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-            //Draw model
-            glBegin(GL_TRIANGLES);
-            //Define color if in fill mode or white if wireframe
-            if(drawModeFill){
-               if(i % 3 == 0) {
+void Model::drawModel() const {
+    int i = 0;
+    float color = 0;
+    for(Point point: points){
+        string line;
+        //Togle between wireframe and fill
+        if(drawModeFill) glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+        else glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+        //Draw model
+        glBegin(GL_TRIANGLES);
+        //Define color if in fill mode or white if wireframe
+        if(drawModeFill){
+            if(i % 3 == 0) {
                 color == 0? color = 1: color = 0;
-                }
-                i++;
-                glColor3f(color, 1-color, 1-color); 
-            } else glColor3f(1, 1, 1);
-            //Draw vertex 
-            glVertex3f(point.x,point.y,point.z);
-        }
-        glEnd();
+            }
+            i++;
+            glColor3f(color, 1-color, 1-color);
+        } else glColor3f(1, 1, 1);
+        //Draw vertex
+        glVertex3f(point.x,point.y,point.z);
     }
-};
+    glEnd();
+}
+
+void Transformation::applyTransformation() {
+    switch (type) {
+        case(0):
+            glTranslatef(this->x,this->y,this->z);
+            break;
+        case(1):
+            glRotatef(this->angle,this->x,this->y,this->z);
+            break;
+        case(2):
+            glScalef(this->x,this->y,this->z);
+            break;
+        default:
+            cout << "Unknown transformation type\n";
+            break;
+    }
+}
 
 //Modelos lidos do ficheiro XML
-map<int,Model> modelsToDraw;
+list<Model> modelsToDraw;
 
 //Configuração da camera atual
 CameraConfig cameraConfig;
 
-
 //Abre um ficheiro .3d e carrega-o para memória
-Model openFileAndLoadModel (string filename){
+Model openFileAndLoadModel (const string& filename){
     fstream file;
     file.open(filename,ios::in);
     Model model;
@@ -101,7 +77,7 @@ Model openFileAndLoadModel (string filename){
         float color = 0;
         while (getline(file,line)) {
             sscanf(line.c_str(),"%f %f %f",&point_x,&point_y,&point_z);
-            Point point;
+            Point point{};
             point.x = point_x;
             point.y = point_y;
             point.z = point_z;
@@ -112,102 +88,151 @@ Model openFileAndLoadModel (string filename){
     return model;
 }
 
+void readCameraXMLConfigurations(TiXmlElement* root){
+    int i = 0;
+    for (TiXmlElement* e = root->FirstChildElement("camera")->FirstChildElement(); e != nullptr; e = e->NextSiblingElement())
+    {
+        const char *x = e->Attribute("x");
+        const char *y = e->Attribute("y");
+        const char *z = e->Attribute("z");
+        const char *fov = e->Attribute("fov");
+        const char *near = e->Attribute("near");
+        const char *far = e->Attribute("far");
+        if (x && i == 0) {
+            cout << "Position x: " << x << "\n";
+            cameraConfig.cameraX = atof(x);
+        }
+        if (y && i == 0) {
+            cout << "Position y: " << y << "\n";
+            cameraConfig.cameraY = atof(y);
+        }
+        if (z && i == 0) {
+            cout << "Position z: " << z << "\n";
+            cameraConfig.cameraZ = atof(z);
+        }
+        if (x && i == 1) {
+            cout << "LookAt x: " << x << "\n";
+            cameraConfig.lookAtX = atof(x);
+        }
+        if (y && i == 1) {
+            cout << "LookAt y: " << y << "\n";
+            cameraConfig.lookAtY = atof(y);
+
+        }
+        if (z && i == 1) {
+            cout << "LookAt z: " << z << "\n";
+            cameraConfig.lookAtZ = atof(z);
+        }
+        if (x && i == 2) {
+            cout << "Up x: " << x << "\n";
+            cameraConfig.upX = atof(x);
+        }
+        if (y && i == 2) {
+            cout << "Up y: " << y << "\n";
+            cameraConfig.upY = atof(y);
+        }
+        if (z && i == 2) {
+            cout << "Up z: " << z << "\n";
+            cameraConfig.upZ = atof(z);
+        }
+        if (fov) {
+            cout << "FOV: " << fov << "\n";
+            cameraConfig.fov = atof(fov);
+
+        }
+        if (near) {
+            cout << "Near: " << near << "\n";
+            cameraConfig.near = atof(near);
+        }
+        if (far) {
+            cout << "Far: " << far << "\n";
+            cameraConfig.far = atof(far);
+        }
+        i++;
+    }
+}
+
+void readGroupXMLConfigurationFile(TiXmlElement* root){
+    int i = 0;
+    list<Transformation> transformationList{};
+       for (TiXmlElement* element = root->FirstChildElement("group"); element != nullptr; element = element->NextSiblingElement()){
+           for (TiXmlElement* element2 = element -> FirstChildElement("transform"); element2 != nullptr ; element2 = element2->NextSiblingElement() ) {
+               for(TiXmlElement* element3 = element2 -> FirstChildElement(); element3 != nullptr ; element3 = element3->NextSiblingElement()){
+                   Transformation transformation{};
+                   if(strcmp(element3->Value(),"translate") == 0){
+                       transformation.type = 0;
+                       transformation.angle = 0;
+                       transformation.x = atof(element3->Attribute("x"));
+                       transformation.y = atof(element3->Attribute("y"));
+                       transformation.z = atof(element3->Attribute("z"));
+                       transformationList.push_back(transformation);
+                       cout << "Translate x: " << transformation.x;
+                       cout << " y: " << transformation.y;
+                       cout << " z: " << transformation.z << "\n";
+                   }
+                   if(strcmp(element3->Value(),"rotate") == 0){
+                       transformation.type = 1;
+                       transformation.angle = atof(element3->Attribute("angle"));
+                       transformation.x = atof(element3->Attribute("x"));
+                       transformation.y = atof(element3->Attribute("y"));
+                       transformation.z = atof(element3->Attribute("z"));
+                       transformationList.push_back(transformation);
+                       cout << "Rotate angle: " << transformation.angle;
+                       cout << " x: " << transformation.x;
+                       cout << " y: " << transformation.y;
+                       cout << " z: " << transformation.z << "\n";
+                   }
+                   if(strcmp(element3->Value(),"scale") == 0){
+                       transformation.type = 2;
+                       transformation.angle = 0;
+                       transformation.x = atof(element3->Attribute("x"));
+                       transformation.y = atof(element3->Attribute("y"));
+                       transformation.z = atof(element3->Attribute("z"));
+                       transformationList.push_back(transformation);
+                       cout << "Scale x: " << transformation.x;
+                       cout << " y: " << transformation.y;
+                       cout << " z: " << transformation.z << "\n";
+                   }
+                   if(strcmp(element3->Value(),"model") == 0){
+                       const char *modelFile = element3->Attribute("file");
+                       Model model = openFileAndLoadModel(modelFile);
+                       model.transformations = transformationList;
+                       modelsToDraw.push_back(model);
+                       cout << "Model file: " << modelFile << "\n";
+                   }
+               }
+           }
+           /*
+           element->FirstChildElement("models")->FirstChildElement();
+           const char *a1 = element->Attribute("file");
+           if (a1)
+               cout << "Model file: " << a1 << "\n";
+           Model model = openFileAndLoadModel(a1);
+           //modelsToDraw.insert(pair<int, Model>(i, model));
+           i++;*/
+       }
+}
+
 //Ler o ficheiro XML e carregar os modelos
 void readXMLConfigurationFile(char* filename) {
     TiXmlDocument document;
     bool fileOpened = document.LoadFile(filename);
+    int i = 0;
     if(fileOpened){
         TiXmlElement* root = document.RootElement();
-        int i = 0;
-        for (TiXmlElement* e = root->FirstChildElement("camera")->FirstChildElement(); e != NULL; e = e->NextSiblingElement())
-        {
-            if (e)
-            {
-                const char *a1 = e->Attribute("x");
-                const char *a2 = e->Attribute("y");
-                const char *a3 = e->Attribute("z");
-                const char *a4 = e->Attribute("fov");
-                const char *a5 = e->Attribute("near");
-                const char *a6 = e->Attribute("far");
-
-                //DEBUG
-                if (a1 && i == 0) {
-                    cout << "Position x: " << a1 << "\n";
-                    cameraConfig.cameraX = atof(a1);
-                }
-                if (a2 && i == 0) {
-                    cout << "Position y: " << a2 << "\n";
-                    cameraConfig.cameraY = atof(a2);
-
-                }
-                if (a3 && i == 0) {
-                    cout << "Position z: " << a3 << "\n";
-                    cameraConfig.cameraZ = atof(a3);
-                }
-                if (a1 && i == 1) {
-                    cout << "LookAt x: " << a1 << "\n";
-                    cameraConfig.lookAtX = atof(a1);
-                }
-                if (a2 && i == 1) {
-                    cout << "LookAt y: " << a2 << "\n";
-                    cameraConfig.lookAtY = atof(a2);
-
-                }
-                if (a3 && i == 1) {
-                    cout << "LookAt z: " << a3 << "\n";
-                    cameraConfig.lookAtZ = atof(a3);
-                }
-                if (a1 && i == 2) {
-                    cout << "Up x: " << a1 << "\n";
-                    cameraConfig.upX = atof(a1);
-                }
-                if (a2 && i == 2) {
-                    cout << "Up y: " << a2 << "\n";
-                    cameraConfig.upY = atof(a2);
-                }
-                if (a3 && i == 2) {
-                    cout << "Up z: " << a3 << "\n";
-                    cameraConfig.upZ = atof(a3);
-                }
-                if (a4){
-                    cout << "FOV: " << a4 << "\n";
-                    cameraConfig.fov = atof(a4);
-
-                }
-                if (a5) {
-                    cout << "Near: " << a5 << "\n";
-                    cameraConfig.near = atof(a5);
-                }
-                if (a6) {
-                    cout << "Far: " << a6 << "\n";
-                    cameraConfig.far = atof(a6);
-                }
-            }
-            i++;
-        }
-        i = 0;
-        for (TiXmlElement* e = root->FirstChildElement("group")->FirstChildElement("models")->FirstChildElement(); e != NULL; e = e->NextSiblingElement())
-        {
-            if (e)
-            {
-                const char *a1 = e->Attribute("file");
-
-                if (a1)
-                    cout << "Model file: " << a1 << "\n";
-                    Model model = openFileAndLoadModel(a1);
-                    modelsToDraw.insert(pair<int,Model>(i,model));
-            }
-            i++;
-        }
+        readCameraXMLConfigurations(root);
+        readGroupXMLConfigurationFile(root);
     } else cout << "Error: Can't open XML File: " << filename << "\n";
 
 }
+
+
 
 //Redimensionar janela
 void changeSize(int w, int h) {
 
     // Prevent a divide by zero, when window is too short
-    // (you cant make a window with zero width).
+    // (you can't make a window with zero width).
     if(h == 0)
         h = 1;
 
@@ -236,15 +261,15 @@ void drawAxis(){
     //X Axis
     glColor3f(1.0f, 0.0f, 0.0f);
     glVertex3f(-100.0f, 0.0f, 0.0f);
-    glVertex3f( 10.0f, 0.0f, 0.0f);
+    glVertex3f( 100.0f, 0.0f, 0.0f);
     //Y Axis
     glColor3f(0.0f, 1.0f, 0.0f);
     glVertex3f(0.0f, -100.0f, 0.0f);
-    glVertex3f(0.0f, 10.0f, 0.0f);
+    glVertex3f(0.0f, 100.0f, 0.0f);
     // Z Axis
     glColor3f(0.0f, 0.0f, 1.0f);
     glVertex3f(0.0f, 0.0f, -100.0f);
-    glVertex3f(0.0f, 0.0f, 10.0f);
+    glVertex3f(0.0f, 0.0f, 100.0f);
     glEnd();
 
 }
@@ -261,10 +286,9 @@ void renderScene(void) {
               cameraConfig.lookAtX,cameraConfig.lookAtY,cameraConfig.lookAtZ,
               cameraConfig.upX,cameraConfig.upY,cameraConfig.upZ);
 
-    //gluPerspective(cameraConfig.fov,400/400,cameraConfig.near,cameraConfig.far);
-
-    for(auto &ent1 :  modelsToDraw) {
-        ent1.second.drawModel();
+    // For each pair model list<transformation> apply transformations and draw model
+    for(Model model:  modelsToDraw) {
+        model.drawModel();
     }
     drawAxis();
     // End of frame
@@ -279,11 +303,9 @@ void processKeys(unsigned char c, int xx, int yy) {
 }
 
 void processSpecialKeys(int key, int xx, int yy) {
-
     switch (key) {
         case GLUT_KEY_RIGHT:
             alpha_angle -= 0.1; break;
-
         case GLUT_KEY_LEFT:
             alpha_angle += 0.1; break;
 
@@ -322,19 +344,19 @@ void processSpecialKeys(int key, int xx, int yy) {
     cameraConfig.cameraX = distance_Origin * cos(beta_angle) * sin(alpha_angle);
     cameraConfig.cameraY = distance_Origin * sin(beta_angle);
     cameraConfig.cameraZ = distance_Origin * cos(beta_angle) * cos(alpha_angle);
-            glutPostRedisplay();
-
+    glutPostRedisplay();
 }
 
 int main(int argc, char **argv) {
     if(argc != 2){
-        cout << "Sintax error: \n";
+        cout << "Syntax error: \n";
         cout << "   Usage: ./Engine [XML configuration file]\n";
         exit(-1);
     }
     string xmlFile = argv[1];
     printf("XML File: %s\n",argv[1]);
     readXMLConfigurationFile(argv[1]);
+    /*
     //distância da camera à origem
     distance_Origin = sqrt((cameraConfig.cameraX)*(cameraConfig.cameraX) + (cameraConfig.cameraY)*(cameraConfig.cameraY) + (cameraConfig.cameraZ)*(cameraConfig.cameraZ));
     
@@ -362,7 +384,7 @@ int main(int argc, char **argv) {
 
 // enter GLUT's main cycle
     glutMainLoop();
-
+    */
     return 1;
 }
 
