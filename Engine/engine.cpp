@@ -2,6 +2,8 @@
 #include <GLUT/glut.h>
 #else
 #include <GL/glut.h>
+
+#include <utility>
 #endif
 #define _USE_MATH_DEFINES
 #include "engine.h"
@@ -157,57 +159,70 @@ void readCameraXMLConfigurations(TiXmlElement* root){
     }
 }
 
-void readGroupXMLConfigurationFile(TiXmlElement* root){
-    int i = 0;
+list<Transformation> readTransformation(TiXmlElement* element){
     list<Transformation> transformationList{};
-       for (TiXmlElement* element = root->FirstChildElement("group"); element != nullptr; element = element->NextSiblingElement()){
-           for (TiXmlElement* element2 = element -> FirstChildElement("transform"); element2 != nullptr ; element2 = element2->NextSiblingElement() ) {
-               for(TiXmlElement* element3 = element2 -> FirstChildElement(); element3 != nullptr ; element3 = element3->NextSiblingElement()){
-                   Transformation transformation{};
-                   if(strcmp(element3->Value(),"translate") == 0){
-                       transformation.type = 0;
-                       transformation.angle = 0;
-                       transformation.x = atof(element3->Attribute("x"));
-                       transformation.y = atof(element3->Attribute("y"));
-                       transformation.z = atof(element3->Attribute("z"));
-                       transformationList.push_back(transformation);
-                       cout << "Translate x: " << transformation.x;
-                       cout << " y: " << transformation.y;
-                       cout << " z: " << transformation.z << "\n";
-                   }
-                   if(strcmp(element3->Value(),"rotate") == 0){
-                       transformation.type = 1;
-                       transformation.angle = atof(element3->Attribute("angle"));
-                       transformation.x = atof(element3->Attribute("x"));
-                       transformation.y = atof(element3->Attribute("y"));
-                       transformation.z = atof(element3->Attribute("z"));
-                       transformationList.push_back(transformation);
-                       cout << "Rotate angle: " << transformation.angle;
-                       cout << " x: " << transformation.x;
-                       cout << " y: " << transformation.y;
-                       cout << " z: " << transformation.z << "\n";
-                   }
-                   if(strcmp(element3->Value(),"scale") == 0){
-                       transformation.type = 2;
-                       transformation.angle = 0;
-                       transformation.x = atof(element3->Attribute("x"));
-                       transformation.y = atof(element3->Attribute("y"));
-                       transformation.z = atof(element3->Attribute("z"));
-                       transformationList.push_back(transformation);
-                       cout << "Scale x: " << transformation.x;
-                       cout << " y: " << transformation.y;
-                       cout << " z: " << transformation.z << "\n";
-                   }
-                   if(strcmp(element3->Value(),"model") == 0){
-                       const char *modelFile = element3->Attribute("file");
-                       Model model = openFileAndLoadModel(modelFile);
-                       model.transformations = transformationList;
-                       modelsToDraw.push_back(model);
-                       cout << "Model file: " << modelFile << "\n";
-                   }
-               }
-           }
-       }
+    for(TiXmlElement* element2 = element -> FirstChildElement("transform")->FirstChildElement(); element2 != nullptr ; element2 = element2->NextSiblingElement()){
+        Transformation transformation{};
+        if(strcmp(element2->Value(),"translate") == 0){
+            transformation.type = 0;
+            transformation.angle = 0;
+            transformation.x = atof(element2->Attribute("x"));
+            transformation.y = atof(element2->Attribute("y"));
+            transformation.z = atof(element2->Attribute("z"));
+            transformationList.push_back(transformation);
+            cout << "Translate x: " << transformation.x;
+            cout << " y: " << transformation.y;
+            cout << " z: " << transformation.z << "\n";
+        }
+        if(strcmp(element2->Value(),"rotate") == 0){
+            transformation.type = 1;
+            transformation.angle = atof(element2->Attribute("angle"));
+            transformation.x = atof(element2->Attribute("x"));
+            transformation.y = atof(element2->Attribute("y"));
+            transformation.z = atof(element2->Attribute("z"));
+            transformationList.push_back(transformation);
+            cout << "Rotate angle: " << transformation.angle;
+            cout << " x: " << transformation.x;
+            cout << " y: " << transformation.y;
+            cout << " z: " << transformation.z << "\n";
+        }
+        if(strcmp(element2->Value(),"scale") == 0){
+            transformation.type = 2;
+            transformation.angle = 0;
+            transformation.x = atof(element2->Attribute("x"));
+            transformation.y = atof(element2->Attribute("y"));
+            transformation.z = atof(element2->Attribute("z"));
+            transformationList.push_back(transformation);
+            cout << "Scale x: " << transformation.x;
+            cout << " y: " << transformation.y;
+            cout << " z: " << transformation.z << "\n";
+        }
+    }
+    return transformationList;
+}
+
+Model readModel(TiXmlElement* element){
+    Model model;
+    for(TiXmlElement* element2 = element -> FirstChildElement("models")->FirstChildElement(); element2 != nullptr ; element2 = element2->NextSiblingElement()){
+        const char *modelFile = element2->Attribute("file");
+        cout << "Model file: " << modelFile << "\n";
+        model = openFileAndLoadModel(modelFile);
+    }
+    return model;
+}
+
+void readGroupXMLConfigurationFile(TiXmlElement* element,list<Transformation> transformations){
+    list<Transformation> transformationList = readTransformation(element);
+    for(Transformation transformation: transformations){
+             transformationList.push_front(transformation);
+    }
+    Model model = readModel(element);
+    model.transformations = transformationList;
+    TiXmlElement* subgroup = element->FirstChildElement("group");
+    if(subgroup){
+          readGroupXMLConfigurationFile(subgroup,transformationList);
+    }
+    modelsToDraw.push_back(model);
 }
 
 //Ler o ficheiro XML e carregar os modelos
@@ -218,7 +233,9 @@ void readXMLConfigurationFile(char* filename) {
     if(fileOpened){
         TiXmlElement* root = document.RootElement();
         readCameraXMLConfigurations(root);
-        readGroupXMLConfigurationFile(root);
+        for(TiXmlElement* element2 = root -> FirstChildElement("group"); element2 != nullptr ; element2 = element2->NextSiblingElement()){
+            readGroupXMLConfigurationFile(element2,{});
+        }
     } else cout << "Error: Can't open XML File: " << filename << "\n";
 
 }
