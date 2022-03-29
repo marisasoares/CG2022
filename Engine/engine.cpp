@@ -21,6 +21,10 @@ bool drawModeFill = false;
 void Model::drawModel() const {
     int i = 0;
     float color = 0;
+    glPushMatrix();
+    for( Transformation transformation : this->transformations){
+        transformation.applyTransformation();
+    }
     for(Point point: points){
         string line;
         //Togle between wireframe and fill
@@ -40,6 +44,7 @@ void Model::drawModel() const {
         glVertex3f(point.x,point.y,point.z);
     }
     glEnd();
+    glPopMatrix();
 }
 
 void Transformation::applyTransformation() {
@@ -202,14 +207,6 @@ void readGroupXMLConfigurationFile(TiXmlElement* root){
                    }
                }
            }
-           /*
-           element->FirstChildElement("models")->FirstChildElement();
-           const char *a1 = element->Attribute("file");
-           if (a1)
-               cout << "Model file: " << a1 << "\n";
-           Model model = openFileAndLoadModel(a1);
-           //modelsToDraw.insert(pair<int, Model>(i, model));
-           i++;*/
        }
 }
 
@@ -356,7 +353,6 @@ int main(int argc, char **argv) {
     string xmlFile = argv[1];
     printf("XML File: %s\n",argv[1]);
     readXMLConfigurationFile(argv[1]);
-    /*
     //distância da camera à origem
     distance_Origin = sqrt((cameraConfig.cameraX)*(cameraConfig.cameraX) + (cameraConfig.cameraY)*(cameraConfig.cameraY) + (cameraConfig.cameraZ)*(cameraConfig.cameraZ));
     
@@ -384,7 +380,6 @@ int main(int argc, char **argv) {
 
 // enter GLUT's main cycle
     glutMainLoop();
-    */
     return 1;
 }
 
