@@ -18,7 +18,13 @@ float alpha_angle,beta_angle = 0.5;
 float distance_Origin = 0;
 
 //Modo de desenho
-bool drawModeFill = false;
+bool drawModeFill = true;
+
+//Desenhar os eixos
+bool drawAxisBool = false;
+
+//Alterar o Culling
+bool frontCull = false;
 
 void Model::drawModel() const {
     int i = 0;
@@ -49,6 +55,15 @@ void Model::drawModel() const {
     glPopMatrix();
 }
 
+void Model::printOut() {
+    cout << "----------------------------------\n";
+    cout << "Model Filename: " + this->filename + "\n";
+    cout << "Transformations List:\n";
+    for( Transformation transformation : this->transformations){
+        cout << transformation.toString();
+    }
+}
+
 
 void Transformation::applyTransformation() {
     switch (type) {
@@ -70,6 +85,28 @@ void Transformation::applyTransformation() {
     }
 }
 
+std::string Transformation::toString(){
+    string output_string;
+    switch (type) {
+        case(0):
+            output_string = "Translate x: " + to_string(this->x) + " y: " + to_string(this->y) + " z: " + to_string(this->z) + "\n";
+            break;
+        case(1):
+            output_string = "Rotate angle: " + to_string(this->angle) + " x: " + to_string(this->x) + " y: " + to_string(this->y) + " z: " + to_string(this->z) + "\n";
+            break;
+        case(2):
+            output_string = "Scale x: " + to_string(this->x) + " y: " + to_string(this->y) + " z: " + to_string(this->z) + "\n";
+            break;
+        case(3):
+            output_string = "Color x: " + to_string(this->color_r) + " y: " + to_string(this->color_g) + " z: " + to_string(this->color_b) + "\n";
+            break;
+        default:
+            output_string ="Unknown transformation type\n";
+            break;
+    }
+    return output_string;
+}
+
 //Modelos lidos do ficheiro XML
 list<Model> modelsToDraw;
 
@@ -81,6 +118,7 @@ Model openFileAndLoadModel (const string& filename){
     fstream file;
     file.open(filename,ios::in);
     Model model;
+    model.filename = filename;
     if(file.is_open()){
         string line;
         float point_x,point_y,point_z;
@@ -228,15 +266,13 @@ Model readModel(TiXmlElement* element){
 
 void readGroupXMLConfigurationFile(TiXmlElement* element,list<Transformation> transformations){
     list<Transformation> transformationList = readTransformation(element);
-    for(Transformation transformation: transformations){
-             transformationList.push_front(transformation);
+    for(Transformation transformation: transformationList){
+             transformations.push_back(transformation);
     }
     Model model = readModel(element);
-    model.transformations = transformationList;
-    TiXmlElement* subgroup = element->FirstChildElement("group");
-    if(subgroup){
-          readGroupXMLConfigurationFile(subgroup,transformationList);
-    }
+    model.transformations = transformations;
+    for(TiXmlElement* subgroup = element -> FirstChildElement("group"); subgroup != nullptr ; subgroup = subgroup->NextSiblingElement())
+        readGroupXMLConfigurationFile(subgroup,transformationList);
     modelsToDraw.push_back(model);
 }
 
@@ -283,7 +319,6 @@ void changeSize(int w, int h) {
     glMatrixMode(GL_MODELVIEW);
 }
 
-
 //Desenhar os eixos XYZ
 void drawAxis(){
     glBegin(GL_LINES);
@@ -303,6 +338,7 @@ void drawAxis(){
 
 }
 
+
 void renderScene(void) {
 
     // clear buffers
@@ -319,7 +355,7 @@ void renderScene(void) {
     for(Model model:  modelsToDraw) {
         model.drawModel();
     }
-    drawAxis();
+    if(drawAxisBool) drawAxis();
     // End of frame
     glutSwapBuffers();
 }
@@ -358,16 +394,14 @@ void processSpecialKeys(int key, int xx, int yy) {
         case GLUT_KEY_PAGE_UP: distance_Origin += 0.5f; break;
 
         case GLUT_KEY_F1:
-            glCullFace(GL_FRONT);
+            drawAxisBool ? drawAxisBool = false: drawAxisBool = true;
             break;
         case GLUT_KEY_F2:
-            glCullFace(GL_BACK);
+            frontCull ? frontCull = false: frontCull = true;
+            frontCull ? glCullFace(GL_FRONT) : glCullFace(GL_BACK);
             break;
         case GLUT_KEY_F3:
-            drawModeFill = false;
-            break;
-        case GLUT_KEY_F4:
-            drawModeFill = true;
+            drawModeFill ? drawModeFill = false : drawModeFill = true;
             break;
     }
     cameraConfig.cameraX = distance_Origin * cos(beta_angle) * sin(alpha_angle);
@@ -385,6 +419,9 @@ int main(int argc, char **argv) {
     string xmlFile = argv[1];
     printf("XML File: %s\n",argv[1]);
     readXMLConfigurationFile(argv[1]);
+    for(Model model:  modelsToDraw) {
+        model.printOut();
+    }
     //distância da camera à origem
     distance_Origin = sqrt((cameraConfig.cameraX)*(cameraConfig.cameraX) + (cameraConfig.cameraY)*(cameraConfig.cameraY) + (cameraConfig.cameraZ)*(cameraConfig.cameraZ));
     

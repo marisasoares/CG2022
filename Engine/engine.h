@@ -57,13 +57,16 @@ public:
     float angle;
 public:
     void applyTransformation();
+    std::string toString();
 };
 
 //Modelo carregado de ficheiros .3d
 class Model {
 public:
+    std::string filename = "NaN";
     std::list<Point> points;
     std::list<Transformation> transformations{};
     void drawModel() const;
+    void printOut();
 };
 
