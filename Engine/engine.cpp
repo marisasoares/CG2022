@@ -35,19 +35,20 @@ void Model::drawModel() const {
         //Draw model
         glBegin(GL_TRIANGLES);
         //Define color if in fill mode or white if wireframe
-        if(drawModeFill){
+        /*if(drawModeFill){
             if(i % 3 == 0) {
                 color == 0? color = 1: color = 0;
             }
             i++;
             glColor3f(color, 1-color, 1-color);
-        } else glColor3f(1, 1, 1);
+        } else glColor3f(1, 1, 1);*/
         //Draw vertex
         glVertex3f(point.x,point.y,point.z);
     }
     glEnd();
     glPopMatrix();
 }
+
 
 void Transformation::applyTransformation() {
     switch (type) {
@@ -59,6 +60,9 @@ void Transformation::applyTransformation() {
             break;
         case(2):
             glScalef(this->x,this->y,this->z);
+            break;
+        case(3):
+            glColor3f(this->color_r/255,this->color_g/255,this->color_b/255);
             break;
         default:
             cout << "Unknown transformation type\n";
@@ -163,6 +167,17 @@ list<Transformation> readTransformation(TiXmlElement* element){
     list<Transformation> transformationList{};
     for(TiXmlElement* element2 = element -> FirstChildElement("transform")->FirstChildElement(); element2 != nullptr ; element2 = element2->NextSiblingElement()){
         Transformation transformation{};
+        if(strcmp(element2->Value(),"color") == 0){
+            transformation.type = 3;
+            transformation.angle = 0;
+            transformation.color_r = atof(element2->Attribute("r"));
+            transformation.color_g = atof(element2->Attribute("g"));
+            transformation.color_b = atof(element2->Attribute("b"));
+            transformationList.push_back(transformation);
+            cout << "Color r: " << transformation.color_r;
+            cout << " g: " << transformation.color_g;
+            cout << " b: " << transformation.color_b << "\n";
+        }
         if(strcmp(element2->Value(),"translate") == 0){
             transformation.type = 0;
             transformation.angle = 0;

@@ -45,7 +45,11 @@ public:
     /* 0 - Transform
      * 1 - Rotate
      * 2 - Scale
+     * 3 - Color
      * */
+    float color_r = 1;
+    float color_g = 1;
+    float color_b = 1;
     int type;
     float x;
     float y;
