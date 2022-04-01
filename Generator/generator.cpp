@@ -352,7 +352,7 @@ void createSphere(float raio, int stacks, int slices) {
         float delta2 = M_PI / slices;
 
         fstream file;
-        file.open(filename);
+        file.open(filename,ios::out);
         float x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4;
         float a, aux = 0;
 
@@ -455,10 +455,10 @@ void showSintaxError(){
     printf("Sintax error:\n");
     printf("   Usage: ./generator [Shape] [Args] [Output File]\n");
     printf(" Shapes available: \n");
-    printf("    Plane: [length] [divisions]\n");
-    printf("    Box: [size] [divisions]\n");
-    printf("    Sphere: [radious] [slices] [height]\n");
-    printf("    Cone: [radious] [heigth] [Slices] [stacks]\n");
+    printf("    plane: [length] [divisions]\n");
+    printf("    box: [size] [divisions]\n");
+    printf("    sphere: [radious] [slices] [height]\n");
+    printf("    cone: [radious] [heigth] [Slices] [stacks]\n");
     exit(-1);
 }
 

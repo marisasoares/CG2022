@@ -156,9 +156,50 @@
     <group>
         <transform>
             <color r="0" g="255" b="255" />
-            <rotate angle="351" x="0" y="1" z="0" />
+            <rotate angle="245" x="0" y="1" z="0" />
             <translate x="250" y="0" z="0" />
             <scale x="11" y="11" z="11" />
+        </transform>
+        <models>
+            <model file="sphere.3d" />
+        </models>
+    </group>
+    <!-- Uranus's Moon 1 -->
+    <group>
+        <transform>
+            <color r="245" g="1" b="123" />
+            <rotate angle="245" x="0" y="1" z="0" />
+            <translate x="250" y="0" z="0" />
+            <rotate angle="56" x="0" y="1" z="0" />
+            <translate x="18" y="0" z="18" />
+            <scale x="0.5" y="0.5" z="0.5" />
+        </transform>
+        <models>
+            <model file="sphere.3d" />
+        </models>
+    </group>
+    <!-- Uranus's Moon 2 -->
+    <group>
+        <transform>
+            <color r="0" g="145" b="255" />
+            <rotate angle="245" x="0" y="1" z="0" />
+            <translate x="250" y="0" z="0" />
+            <rotate angle="236" x="0" y="1" z="0" />
+            <translate x="20" y="0" z="20" />
+        </transform>
+        <models>
+            <model file="sphere.3d" />
+        </models>
+    </group>
+     <!-- Uranus's Moon 3 -->
+    <group>
+        <transform>
+            <color r="134" g="145" b="12" />
+            <rotate angle="245" x="0" y="1" z="0" />
+            <translate x="250" y="0" z="0" />
+            <rotate angle="123" x="0" y="1" z="0" />
+            <translate x="23" y="0" z="23" />
+            <scale x="2" y="2" z="2" />
         </transform>
         <models>
             <model file="sphere.3d" />

@@ -1,7 +1,3 @@
-//
-// Created by miguel on 08/03/22.
-//
-
 #ifndef CG2022_ENGINE_H
 #define CG2022_ENGINE_H
 #endif //CG2022_ENGINE_H
@@ -30,6 +26,8 @@ public:
     float fov;
     float near;
     float far;
+public:
+    void printOut();
 };
 
 //Ponto no espaço
