@@ -140,7 +140,7 @@ std::string Transformation::toString(){
     return output_string;
 }
 
-//Abre um ficheiro .3d e carrega-o para memória
+//Opens a 3d file and loads it to memory
 Model openFileAndLoadModel (const string& filename){
     fstream file;
     file.open(filename,ios::in);
@@ -295,7 +295,7 @@ void changeSize(int w, int h) {
     glMatrixMode(GL_MODELVIEW);
 }
 
-//Desenhar os eixos XYZ
+//Draw XYZ Axis
 void drawAxis(float size){
     glBegin(GL_LINES);
 
@@ -361,11 +361,11 @@ void processSpecialKeys(int key, int xx, int yy) {
             if (beta_angle < -1.5f)
                 beta_angle = -1.5f;
             break;
-        case GLUT_KEY_PAGE_DOWN: distance_Origin -= 0.5f;
+        case GLUT_KEY_PAGE_DOWN: distance_Origin -= 5.0f;
             if (distance_Origin < 1.0f)
                 distance_Origin = 1.0f;
             break;
-        case GLUT_KEY_PAGE_UP: distance_Origin += 0.5f; break;
+        case GLUT_KEY_PAGE_UP: distance_Origin += 5.0f; break;
         case GLUT_KEY_F1:
             drawAxisBool ? drawAxisBool = false: drawAxisBool = true;
             break;

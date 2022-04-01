@@ -68,3 +68,20 @@ public:
     void printOut();
 };
 
+//Opens a 3d file and loads it to memory
+Model openFileAndLoadModel (const std::string& filename);
+
+/* Read camera configurations (Position FOV near far)*/
+void readCameraXMLConfigurations(TiXmlElement* root);
+
+/* Read transformations from o group */
+std::list<Transformation> readTransformation(TiXmlElement* element);
+
+/* Read a group from the XML file*/
+void readGroupXMLConfigurationFile(TiXmlElement* element,std::list<Transformation> transformations);
+
+//Ler o ficheiro XML e carregar os modelos
+bool readXMLConfigurationFile(char* filename);
+
+//Draw XYZ Axis
+void drawAxis(float size);
