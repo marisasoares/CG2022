@@ -5,15 +5,20 @@ $(shell mkdir -p $(DIRS))
 
 all: build/engine build/generator
 
+debug: build/engine-debug
+
 engine: build/engine
 
 generator: build/generator
-	
+
 build/engine:
-	g++ ./Engine/engine.cpp  ./Engine/engine.h  ./Engine/tiny* -lglut -lGL -lGLU -lXi -lXmu -o ./build/engine 
+	g++ ./Engine/*.cpp  ./Engine/*.h -lglut -lGL -lGLU -lXi -lXmu -o ./build/engine 
 
 build/generator:
 	g++ ./Generator/generator.cpp ./Generator/generator.h -lglut -lGL -lGLU -lXi -lXmu -o ./build/generator 
 
+build/engine-debug:
+	g++ ./Engine/*.cpp  ./Engine/*.h -g -lglut -lGL -lGLU -lXi -lXmu -o ./build/engine-debug 
+
 clean:
-	rm -r ./build
+	rm ./build/engine ./build/generator
