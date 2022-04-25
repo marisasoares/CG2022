@@ -10,6 +10,9 @@
 
 using namespace std;
 
+// Define tesselation for catmull-rom curves
+float tesselation = 100;
+
 // Ângulos da camera
 float alpha_angle,beta_angle = 0.5;
 
@@ -27,6 +30,9 @@ bool frontCull = false;
 
 /* Change the way color is displayed True-> Use 2 alternating colors for faces False-> Use 1 color for faces*/
 bool alternatingColorFaces = false;
+
+/* Global time */
+float t = 0;
 
 /* XML file opened*/
 string xmlFile;
@@ -70,7 +76,7 @@ void Model::drawModel() const {
 /* Print Model to stdout */
 void Model::printOut() {
     // Print file
-    cout << "----------------------------------\n";
+    cout << "==================================================\n";
     cout << "Model Filename: " + this->filename + "\n";
     cout << "Transformations List:\n";
     // Print Transformation list
@@ -80,7 +86,7 @@ void Model::printOut() {
 }
 
 void CameraConfig::printOut() {
-    cout << "----------------------------------\n";
+    cout << "==================================================\n";
     cout << "Camera Configurations:\n";
     cout << "Position x: " << this->cameraX;
     cout << " y: " << this->cameraY;
@@ -96,11 +102,55 @@ void CameraConfig::printOut() {
     cout << "Far: " << this->far<<"\n";
 }
 
+void renderCatmullRomCurve(std::list<Point> PointList) {
+    float pos[3];
+    float deriv[3];
+    glBegin(GL_LINE_LOOP);
+    float gt = 0;
+    while (gt < 1) {
+        getGlobalCatmullRomPoint(gt, pos, deriv,PointList);
+        glVertex3f(pos[0], pos[1], pos[2]);
+        gt += 1.0 / tesselation;
+    }
+    /*glBegin(GL_LINE);
+    while (gt < 1) {
+        getGlobalCatmullRomPoint(gt, pos, deriv);
+        glVertex3f(pos[0],pos[1],pos[2]);
+        glVertex3f(deriv[0]*5,deriv[1]*5,deriv[2]*5);
+        gt += 1.0/TESSELATION;
+    }*/
+    glEnd();
+}
 /* Apply tranformation to model */
 void Transformation::applyTransformation() {
     switch (type) {
         case(0):
-            glTranslatef(this->x,this->y,this->z);
+            if(this->time != 0 && this->catmullRomPoints.size() >= 4){
+                renderCatmullRomCurve(this->catmullRomPoints);
+                /* Arrays that contains the next point and derivative */
+                float pos[3];
+                float deriv[3];
+                /* Given a t value get a point from the curve */
+                getGlobalCatmullRomPoint(t,pos,deriv,catmullRomPoints);
+                glTranslatef(pos[0],pos[1],pos[2]);
+                /* Aproximate X using the derivative */
+                float x[3] = {deriv[0],deriv[1],deriv[2]};
+                normalize(x);
+                float z[3];
+                /* Find Z by making the cross product between X and the Y vector from the previous iteration */
+                cross(x,prev_y,z);
+                normalize(z);
+                float y[3];
+                /* Find X bye making the cross product of Z and Y vectors calculated earlier */
+                cross(z,x,y);
+                normalize(y);
+                /* Update the previous Y vector */
+                memcpy(prev_y,y,3*sizeof(float));
+                /* Build the 4*4 matrix representing the rotation of the object */
+                float m[16];
+                buildRotMatrix(x,y,z,m);
+                glMultMatrixf(m);
+            } else glTranslatef(this->x,this->y,this->z);
             break;
         case(1):
             glRotatef(this->angle,this->x,this->y,this->z);
@@ -122,10 +172,19 @@ std::string Transformation::toString(){
     string output_string;
     switch (type) {
         case(0):
-            output_string = "Translate x: " + to_string(this->x) + " y: " + to_string(this->y) + " z: " + to_string(this->z) + "\n";
+            if((!this->catmullRomPoints.empty() && this->time != 0)){
+                output_string = "Translate time: " + to_string(this->time) + " align: " + to_string(this->align) + "\nList of points -------\n";
+                for (Point p: this->catmullRomPoints) {
+                    output_string += "Point x: " + to_string(p.x) + " y: " + to_string(p.y) + "z: " + to_string(p.z) + "\n";
+                }
+                output_string += "----------------------\n";
+            } else output_string = "Translate x: " + to_string(this->x) + " y: " + to_string(this->y) + " z: " + to_string(this->z) + "\n";
             break;
         case(1):
-            output_string = "Rotate angle: " + to_string(this->angle) + " x: " + to_string(this->x) + " y: " + to_string(this->y) + " z: " + to_string(this->z) + "\n";
+            output_string = "Rotate ";
+            this->time != 0 ? output_string += "time: " + to_string(this->time) : output_string += "angle: " +
+                    to_string(this->angle);
+            output_string +=  "x: " + to_string(this->x) + " y: " + to_string(this->y) + " z: " + to_string(this->z) + "\n";
             break;
         case(2):
             output_string = "Scale x: " + to_string(this->x) + " y: " + to_string(this->y) + " z: " + to_string(this->z) + "\n";
@@ -206,17 +265,35 @@ list<Transformation> readTransformation(TiXmlElement* element){
         if(strcmp(element2->Value(),"translate") == 0){
             transformation.type = 0;
             transformation.angle = 0;
-            transformation.x = atof(element2->Attribute("x"));
-            transformation.y = atof(element2->Attribute("y"));
-            transformation.z = atof(element2->Attribute("z"));
+            if(element2->Attribute("x")) transformation.x = atof(element2->Attribute("x"));
+            else transformation.x = 0;
+            if(element2->Attribute("y")) transformation.y = atof(element2->Attribute("y"));
+            else transformation.y = 0;
+            if(element2->Attribute("z")) transformation.z = atof(element2->Attribute("z"));
+            else transformation.z = 0;
+            /* Catmull-Rom curve information */
+            if(element2 ->Attribute("time")) transformation.time = atof(element2 ->Attribute("time"));
+            if(element2 ->Attribute("align")){
+                if(strcmp(element2->Attribute("align"),"false") == 0 || strcmp(element2->Attribute("align"),"False") == 0 )
+                    transformation.align = false;
+            }
+            /* Read Catmull-Rom curve points */
+            for(TiXmlElement* element3 = element2 -> FirstChildElement("point"); element3 != nullptr ; element3 = element3->NextSiblingElement()){
+                Point p{};
+                p.x = atof(element3->Attribute("x"));
+                p.y = atof(element3->Attribute("y"));
+                p.z = atof(element3->Attribute("z"));
+                transformation.catmullRomPoints.push_back(p);
+            }
             transformationList.push_back(transformation);
         }
         if(strcmp(element2->Value(),"rotate") == 0){
             transformation.type = 1;
-            transformation.angle = atof(element2->Attribute("angle"));
+            if(element2 ->Attribute("angle")) transformation.angle = atof(element2->Attribute("angle"));
             transformation.x = atof(element2->Attribute("x"));
             transformation.y = atof(element2->Attribute("y"));
             transformation.z = atof(element2->Attribute("z"));
+            if(element2 ->Attribute("time")) transformation.time = atof(element2 ->Attribute("time"));
             transformationList.push_back(transformation);
         }
         if(strcmp(element2->Value(),"scale") == 0){
@@ -315,9 +392,7 @@ void drawAxis(float size){
     glEnd();
 }
 
-
 void renderScene(void) {
-
     // clear buffers
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -336,7 +411,10 @@ void renderScene(void) {
     if(drawAxisBool) drawAxis(1000);
     // End of frame
     glutSwapBuffers();
+    t += 0.001;
+    glutPostRedisplay();
 }
+
 
 
 void processKeys(unsigned char c, int xx, int yy) {
@@ -379,15 +457,23 @@ void processSpecialKeys(int key, int xx, int yy) {
         case GLUT_KEY_F4:
             alternatingColorFaces ? alternatingColorFaces = false : alternatingColorFaces = true;
             break;
+        case GLUT_KEY_F5:
+            tesselation -= 5;
+            break;
+        case GLUT_KEY_F6:
+            if(tesselation <= 5) tesselation = 5;
+            tesselation += 5;
+            break;
     }
     cameraConfig.cameraX = distance_Origin * cos(beta_angle) * sin(alpha_angle);
     cameraConfig.cameraY = distance_Origin * sin(beta_angle);
     cameraConfig.cameraZ = distance_Origin * cos(beta_angle) * cos(alpha_angle);
     string windowTitle = "File: [ " + xmlFile + "]   ";
-    drawAxisBool? windowTitle = windowTitle + "AXIS: TRUE |" :windowTitle = windowTitle + "AXIS: FALSE|";
-    frontCull? windowTitle = windowTitle + " CULL: BACK |" :windowTitle = windowTitle + " CULL: FRONT|";
-    drawModeFill? windowTitle = windowTitle + " DRAW: FILL|" :windowTitle = windowTitle + " DRAW: LINE|";
-    alternatingColorFaces? windowTitle = windowTitle + " COLOR: 2  " :windowTitle = windowTitle + " COLOR: ANY";
+    drawAxisBool? windowTitle += "AXIS: TRUE |" :windowTitle += + "AXIS: FALSE|";
+    frontCull? windowTitle += " CULL: BACK |" :windowTitle += " CULL: FRONT|";
+    drawModeFill? windowTitle += " DRAW: FILL|" :windowTitle += " DRAW: LINE|";
+    alternatingColorFaces? windowTitle += " COLOR: 2  " :windowTitle += " COLOR: ANY";
+    windowTitle += " TESSELATION: " + to_string(tesselation);
     glutSetWindowTitle(windowTitle.c_str());
     glutPostRedisplay();
 }
