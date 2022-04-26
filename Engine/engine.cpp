@@ -19,6 +19,9 @@ float alpha_angle,beta_angle = 0.5;
 // Distância da camera à origem
 float distance_Origin = 0;
 
+// Is mouse right click pressed
+int tracking = 0;
+
 /* Modo de desenho True -> GL_FILL False -> GL_LINE */
 bool drawModeFill = true;
 
@@ -145,7 +148,9 @@ void Transformation::applyTransformation() {
                 cross(z,x,y);
                 normalize(y);
                 /* Update the previous Y vector */
-                memcpy(prev_y,y,3*sizeof(float));
+                this->prev_y[0] = y[0];
+                this->prev_y[1] = y[1];
+                this->prev_y[2] = y[2];
                 /* Build the 4*4 matrix representing the rotation of the object */
                 float m[16];
                 buildRotMatrix(x,y,z,m);
@@ -415,6 +420,16 @@ void renderScene(void) {
     glutPostRedisplay();
 }
 
+string getWindowTitle(){
+    string windowTitle = "File: [ " + xmlFile + "]   ";
+    drawAxisBool? windowTitle += "AXIS: TRUE |" :windowTitle += + "AXIS: FALSE|";
+    frontCull? windowTitle += " CULL: BACK |" :windowTitle += " CULL: FRONT|";
+    drawModeFill? windowTitle += " DRAW: FILL|" :windowTitle += " DRAW: LINE|";
+    alternatingColorFaces? windowTitle += " COLOR: 2  " :windowTitle += " COLOR: ANY";
+    windowTitle += "| TESSELATION: " + to_string(tesselation);
+    return windowTitle;
+}
+
 
 
 void processKeys(unsigned char c, int xx, int yy) {
@@ -458,25 +473,20 @@ void processSpecialKeys(int key, int xx, int yy) {
             alternatingColorFaces ? alternatingColorFaces = false : alternatingColorFaces = true;
             break;
         case GLUT_KEY_F5:
+            if(tesselation <= 5) tesselation = 5;
             tesselation -= 5;
             break;
         case GLUT_KEY_F6:
-            if(tesselation <= 5) tesselation = 5;
             tesselation += 5;
             break;
     }
     cameraConfig.cameraX = distance_Origin * cos(beta_angle) * sin(alpha_angle);
     cameraConfig.cameraY = distance_Origin * sin(beta_angle);
     cameraConfig.cameraZ = distance_Origin * cos(beta_angle) * cos(alpha_angle);
-    string windowTitle = "File: [ " + xmlFile + "]   ";
-    drawAxisBool? windowTitle += "AXIS: TRUE |" :windowTitle += + "AXIS: FALSE|";
-    frontCull? windowTitle += " CULL: BACK |" :windowTitle += " CULL: FRONT|";
-    drawModeFill? windowTitle += " DRAW: FILL|" :windowTitle += " DRAW: LINE|";
-    alternatingColorFaces? windowTitle += " COLOR: 2  " :windowTitle += " COLOR: ANY";
-    windowTitle += " TESSELATION: " + to_string(tesselation);
-    glutSetWindowTitle(windowTitle.c_str());
+    glutSetWindowTitle(getWindowTitle().c_str());
     glutPostRedisplay();
 }
+
 
 int main(int argc, char **argv) {
     /* Verify the number of arguments */
@@ -496,20 +506,15 @@ int main(int argc, char **argv) {
     for(Model model:  modelsToDraw) {
         model.printOut();
     }
-    //Calculate distance to origin
-    distance_Origin = sqrt((cameraConfig.cameraX)*(cameraConfig.cameraX) + (cameraConfig.cameraY)*(cameraConfig.cameraY) + (cameraConfig.cameraZ)*(cameraConfig.cameraZ));
-    
+    //Calculate distance to origin (LookAt point)
+    //distance_Origin = sqrt((cameraConfig.cameraX)*(cameraConfig.cameraX) + (cameraConfig.cameraY)*(cameraConfig.cameraY) + (cameraConfig.cameraZ)*(cameraConfig.cameraZ));
+    distance_Origin = sqrt(powf(cameraConfig.cameraX - cameraConfig.lookAtX,2) + powf(cameraConfig.cameraY - cameraConfig.lookAtY,2) + powf(cameraConfig.cameraZ - cameraConfig.lookAtZ,2) );
 // init GLUT and the window
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DEPTH|GLUT_DOUBLE|GLUT_RGBA);
     glutInitWindowPosition(100,100);
     glutInitWindowSize(800,800);
-    string windowTitle = "File: [ " + xmlFile + "]   ";
-    drawAxisBool? windowTitle = windowTitle + "AXIS: TRUE |" :windowTitle = windowTitle + "AXIS: FALSE|";
-    frontCull? windowTitle = windowTitle + " CULL: BACK |" :windowTitle = windowTitle + " CULL: FRONT|";
-    drawModeFill? windowTitle = windowTitle + " DRAW: FILL|" :windowTitle = windowTitle + " DRAW: LINE|";
-    alternatingColorFaces? windowTitle = windowTitle + " COLOR: 2  " :windowTitle = windowTitle + " COLOR: ANY";
-    glutCreateWindow(windowTitle.c_str());
+    glutCreateWindow(getWindowTitle().c_str());
 // Required callback registry
     glutDisplayFunc(renderScene);
     glutReshapeFunc(changeSize);

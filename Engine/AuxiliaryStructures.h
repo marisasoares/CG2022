@@ -66,7 +66,7 @@ public:
     float time = 0; // Time to move in the curve
     std::list<Point> catmullRomPoints; // List of points for catmull-rom curve
     bool align = true; // Align with the curve
-    float prev_y[3] = {0,-1,0};
+    float prev_y[3] = {0,1,0};
 public:
     void applyTransformation();
     std::string toString();
