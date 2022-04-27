@@ -153,12 +153,16 @@ void Transformation::applyTransformation() {
                 this->prev_y[2] = y[2];
                 /* Build the 4*4 matrix representing the rotation of the object */
                 float m[16];
-                buildRotMatrix(x,y,z,m);
-                glMultMatrixf(m);
+                if(this->align){
+                    buildRotMatrix(x,y,z,m);
+                    glMultMatrixf(m);
+                }
             } else glTranslatef(this->x,this->y,this->z);
             break;
         case(1):
-            glRotatef(this->angle,this->x,this->y,this->z);
+            if(this->time != 0){
+                glRotatef(((float)(glutGet(GLUT_ELAPSED_TIME)*360))/(this->time*1000),this->x,this->y,this->z);
+            } else glRotatef(this->angle,this->x,this->y,this->z);
             break;
         case(2):
             glScalef(this->x,this->y,this->z);
@@ -189,7 +193,7 @@ std::string Transformation::toString(){
             output_string = "Rotate ";
             this->time != 0 ? output_string += "time: " + to_string(this->time) : output_string += "angle: " +
                     to_string(this->angle);
-            output_string +=  "x: " + to_string(this->x) + " y: " + to_string(this->y) + " z: " + to_string(this->z) + "\n";
+            output_string +=  " x: " + to_string(this->x) + " y: " + to_string(this->y) + " z: " + to_string(this->z) + "\n";
             break;
         case(2):
             output_string = "Scale x: " + to_string(this->x) + " y: " + to_string(this->y) + " z: " + to_string(this->z) + "\n";
