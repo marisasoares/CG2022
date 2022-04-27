@@ -30,13 +30,13 @@ public:
     float getCoordinate(int index){
         float returnCoordinate;
         switch (index) {
-            case 1:
+            case 0:
                 returnCoordinate = this->x;
                 break;
-            case 2:
+            case 1:
                 returnCoordinate = this->y;
                 break;
-            case 3:
+            case 2:
                 returnCoordinate = this->z;
                 break;
             default:

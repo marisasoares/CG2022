@@ -134,7 +134,7 @@ void Transformation::applyTransformation() {
                 float pos[3];
                 float deriv[3];
                 /* Given a t value get a point from the curve */
-                getGlobalCatmullRomPoint(t,pos,deriv,catmullRomPoints);
+                getGlobalCatmullRomPoint((glutGet(GLUT_ELAPSED_TIME))*(1/(this->time*1000)),pos,deriv,catmullRomPoints);
                 glTranslatef(pos[0],pos[1],pos[2]);
                 /* Aproximate X using the derivative */
                 float x[3] = {deriv[0],deriv[1],deriv[2]};
