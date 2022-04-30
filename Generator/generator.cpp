@@ -9,6 +9,7 @@
 #include <iostream>
 #include <fstream>
 #include <stdlib.h>
+#include <vector>
 #include "sstream"
 
 #define _USE_MATH_DEFINES
@@ -17,6 +18,11 @@
 using namespace std;
 
 string filename;
+
+//Classe Point
+class Point{
+public: float x,y,z;
+};
 
 void drawBox(float x, float y, float z, int slices)
 {
@@ -480,143 +486,148 @@ void showSintaxError()
     exit(-1);
 }
 
-float* formulaBezier( float tt, float *p1 , float *p2 , float *p3 , float *p4) {
+void createBezierPatch(const char* patch, int tesselation, const char* savefilename){
+    std::fstream f;
+    f.open(patch,std::ios::in);
+    int patches=0;
+    int vertices=0;
+    std::vector<std::vector<int> > indicesPatch;
+    std::vector<Point> vertex;
 
-    float ite = 1.0 - tt;
-    float* ppt = new float[3];
+    if(f.is_open()){
+        std::string line;
+        if(getline(f,line)) sscanf(line.c_str(),"%d\n",&patches);
+        for(int i=0; i<patches ;i++){
+            std::vector<int> aux;
+            if(getline(f,line)){
+                int n1,n2,n3,n4,n5,n6,n7,n8,n9,n10,n11,n12,n13,n14,n15,n16=0;
+                sscanf(line.c_str(),"%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d\n",&n1,&n2,&n3,&n4,&n5,&n6,&n7,&n8,&n9,&n10,&n11,&n12,&n13,&n14,&n15,&n16);
+                aux.push_back(n1);
+                aux.push_back(n2);
+                aux.push_back(n3);
+                aux.push_back(n4);
+                aux.push_back(n5);
+                aux.push_back(n6);
+                aux.push_back(n7);
+                aux.push_back(n8);
+                aux.push_back(n9);
+                aux.push_back(n10);
+                aux.push_back(n11);
+                aux.push_back(n12);
+                aux.push_back(n13);
+                aux.push_back(n14);
+                aux.push_back(n15);
+                aux.push_back(n16);
+            }
 
-    float x0 , x1 , x2 , x3;
-    x0 = pow(ite,3);
-    x1 = 3 * tt*pow(ite,2);
-    x2 = 3 * tt * tt * ite;
-    x3 = tt * tt * tt;
+            indicesPatch.push_back(aux);
+        }
+        if(getline(f,line)) sscanf(line.c_str(),"%d\n",&vertices);
+        for(int i=0; i<vertices ;i++){
+            float x=0,y=0,z=0;
+            if(getline(f,line)) sscanf(line.c_str(),"%f, %f, %f\n",&x,&y,&z);
 
-    ppt[0] = x0*p1[0] + x1*p2[0] + x2*p3[0] + x3*p4[0];
-    ppt[1] = x0*p1[1] + x1*p2[1] + x2*p3[1] + x3*p4[1];
-    ppt[2] = x0*p1[2] + x1*p2[2] + x2*p3[2] + x3*p4[2];
+            Point p;
+            p.x = x; p.y = y; p.z = z;
 
-
-    return ppt;
-}
-
-
-float* bezier( float a , float b , int* indice , float** pontos , int ni , int np) {
-
-    float* ponto = new float[3];
-    float altp[4][3];
-    float res[4][3];
-    int i , j = 0 , x = 0;
-    float *calculo;
-
-
-    for( i = 0 ; i < 16 ; i++) {
-        altp[j][0] = pontos[indice[i]][0];
-        altp[j][0] = pontos[indice[i]][1];
-        altp[j][0] = pontos[indice[i]][2];
-
-        j++;
-
-        if( j % 4 == 0 ) {
-            ponto = formulaBezier(a,altp[0],altp[1],altp[2],altp[3]);
-            res[x][0] = ponto[0];
-            res[x][1] = ponto[1];
-            res[x][2] = ponto[2];
-
-            x++;
-
-            j = 0;
+            vertex.push_back(p);
         }
 
+        f.close();
     }
-    calculo = formulaBezier(b,res[0],res[1],res[2],res[3]);
+    else { printf("Error: can't open .patch file\n"); exit(0); }
 
-    return calculo;
-}
+    float res[3];
+    float t;
+    int index, indices[4];
+    float q[4][tesselation][3],r[tesselation][tesselation][3],tess = 1/((float)tesselation-1);
+    float pontos = patches*(tesselation)*2*(tesselation)*3*3;
 
+    std::fstream g;
+    g.open(savefilename,std::ios::out);
 
-void patch( string file , int tess , string name) {
-
-    //abrir ficheiros de input e output
-
-    ofstream fileo(name);
-    string line , aux;
-    ifstream filei(file);
-    int i;
-
-    //get patch
-    if(filei.is_open()) {
-        getline(filei,line);
-        int npatch = atoi(line.c_str());
-        int** indices = new int*[npatch];
-        cout << npatch << endl;
-
-        for(int r = 0 ; r < npatch ; r++) {
-            getline(filei,line);
-            indices[r] = new int[16];
-
-            for(int j = 0 ; j < 16 ; j++) {
-                i = line.find(",");
-                aux = line.substr(0,i);
-                indices[r][j] = atoi(aux.c_str());
-                line.erase(0, i + 1);
+    if(g.is_open()){
+        for(int n=0; n<patches; n++){
+            float p[16][3];
+            for(int m=0; m<16; m++){
+                p[m][0] = vertex[indicesPatch[n][m]].x;
+                p[m][1] = vertex[indicesPatch[n][m]].y;
+                p[m][2] = vertex[indicesPatch[n][m]].z;
             }
-        }
-
-        getline(filei,line);
-        int npontos = atoi(line.c_str());
-        cout << npontos << endl;
-        float** pontos = new float*[npontos];
-
-        //get pontos
-        for( int m = 0 ; m < npontos ; m++){
-            getline(filei,line);
-            pontos[m] = new float[3];
-            for( int l = 0 ; l < 3 ; l++) {
-                i = line.find(",");
-                aux = line.substr(0,i);
-                pontos[m][l] = atof(aux.c_str());
-                line.erase(0 , i + 1);
-            }
-        }
-
-        float incre = 1.0 / tess , u , v , u2 , v2;
-        float *** pontoRes = new float**[npatch];
-
-        for(int rr = 0 ; rr < npatch ; rr++) {
-            pontoRes[rr] = new float*[4];
-            //escrever pontos
-            for( int jj = 0 ; jj < tess ; jj++) {
-
-                for( int mn = 0 ; mn < tess ; mn++) {
-
-                    u = jj*incre;
-                    v = mn*incre;
-                    u2 = (jj + 1)* incre;
-                    v2 = (mn + 1)* incre;
-
-                    pontoRes[rr][0] = bezier(u, v, indices[rr], pontos, npatch, npontos);
-                    pontoRes[rr][1] = bezier(u, v2, indices[rr], pontos, npatch, npontos);
-                    pontoRes[rr][2] = bezier(u2, v, indices[rr], pontos, npatch, npontos);
-                    pontoRes[rr][3] = bezier(u2, v2, indices[rr], pontos, npatch, npontos);
-
-
-                    fileo << pontoRes[rr][0][0] << "," << pontoRes[rr][0][1] << "," << pontoRes[rr][0][2] << endl;
-                    fileo << pontoRes[rr][2][0] << "," << pontoRes[rr][2][1] << "," << pontoRes[rr][2][2] << endl;
-                    fileo << pontoRes[rr][3][0] << "," << pontoRes[rr][3][1] << "," << pontoRes[rr][3][2] << endl;
-
-                    fileo << pontoRes[rr][0][0] << "," << pontoRes[rr][0][1] << "," << pontoRes[rr][0][2] << endl;
-                    fileo << pontoRes[rr][3][0] << "," << pontoRes[rr][3][1] << "," << pontoRes[rr][3][2] << endl;
-                    fileo << pontoRes[rr][1][0] << "," << pontoRes[rr][1][1] << "," << pontoRes[rr][1][2] << endl;
+            int j=0,k=0;
+            for(int i=0; i<15; i+=4){
+                indices[0] = i;
+                indices[1] = i+1;
+                indices[2] = i+2;
+                indices[3] = i+3;
+                for(int a=0; a<tesselation-1; a++){
+                    t = a*tess;
+                    index = floor(t);
+                    t = t - index;
+                    res[0] = (-p[indices[0]][0] +3*p[indices[1]][0] -3*p[indices[2]][0] +p[indices[3]][0])*t*t*t + (3*p[indices[0]][0] -6*p[indices[1]][0] +3*p[indices[2]][0])*t*t + (-3*p[indices[0]][0] +3*p[indices[1]][0])*t + p[indices[0]][0];
+                    res[1] = (-p[indices[0]][1] +3*p[indices[1]][1] -3*p[indices[2]][1] +p[indices[3]][1])*t*t*t + (3*p[indices[0]][1] -6*p[indices[1]][1] +3*p[indices[2]][1])*t*t + (-3*p[indices[0]][1] +3*p[indices[1]][1])*t + p[indices[0]][1];
+                    res[2] = (-p[indices[0]][2] +3*p[indices[1]][2] -3*p[indices[2]][2] +p[indices[3]][2])*t*t*t + (3*p[indices[0]][2] -6*p[indices[1]][2] +3*p[indices[2]][2])*t*t + (-3*p[indices[0]][2] +3*p[indices[1]][2])*t + p[indices[0]][2];
+                    q[j][k][0] = res[0];
+                    q[j][k][1] = res[1];
+                    q[j][k][2] = res[2];
+                    k++;
                 }
+
+                t = 1;
+
+                res[0] = (-p[indices[0]][0] +3*p[indices[1]][0] -3*p[indices[2]][0] +p[indices[3]][0])*t*t*t + (3*p[indices[0]][0] -6*p[indices[1]][0] +3*p[indices[2]][0])*t*t + (-3*p[indices[0]][0] +3*p[indices[1]][0])*t + p[indices[0]][0];
+                res[1] = (-p[indices[0]][1] +3*p[indices[1]][1] -3*p[indices[2]][1] +p[indices[3]][1])*t*t*t + (3*p[indices[0]][1] -6*p[indices[1]][1] +3*p[indices[2]][1])*t*t + (-3*p[indices[0]][1] +3*p[indices[1]][1])*t + p[indices[0]][1];
+                res[2] = (-p[indices[0]][2] +3*p[indices[1]][2] -3*p[indices[2]][2] +p[indices[3]][2])*t*t*t + (3*p[indices[0]][2] -6*p[indices[1]][2] +3*p[indices[2]][2])*t*t + (-3*p[indices[0]][2] +3*p[indices[1]][2])*t + p[indices[0]][2];
+
+                q[j][k][0] = res[0];
+                q[j][k][1] = res[1];
+                q[j][k][2] = res[2];
+                j++;
+                k=0;
             }
 
+            for(int j=0; j<tesselation; j++){
+                for(int a=0; a<tesselation-1; a++){
+                    t = a*tess;;
+                    index = floor(t);
+                    t = t - index;
+
+                    res[0] = (-q[0][j][0] +3*q[1][j][0] -3*q[2][j][0] +q[3][j][0])*t*t*t + (3*q[0][j][0] -6*q[1][j][0] +3*q[2][j][0])*t*t + (-3*q[0][j][0] +3*q[1][j][0])*t + q[0][j][0];
+                    res[1] = (-q[0][j][1] +3*q[1][j][1] -3*q[2][j][1] +q[3][j][1])*t*t*t + (3*q[0][j][1] -6*q[1][j][1] +3*q[2][j][1])*t*t + (-3*q[0][j][1] +3*q[1][j][1])*t + q[0][j][1];
+                    res[2] = (-q[0][j][2] +3*q[1][j][2] -3*q[2][j][2] +q[3][j][2])*t*t*t + (3*q[0][j][2] -6*q[1][j][2] +3*q[2][j][2])*t*t + (-3*q[0][j][2] +3*q[1][j][2])*t + q[0][j][2];
+                    r[j][k][0] = res[0];
+                    r[j][k][1] = res[1];
+                    r[j][k][2] = res[2];
+                    k++;
+                }
+
+                t = 1;
+
+                res[0] = (-q[0][j][0] +3*q[1][j][0] -3*q[2][j][0] +q[3][j][0])*t*t*t + (3*q[0][j][0] -6*q[1][j][0] +3*q[2][j][0])*t*t + (-3*q[0][j][0] +3*q[1][j][0])*t + q[0][j][0];
+                res[1] = (-q[0][j][1] +3*q[1][j][1] -3*q[2][j][1] +q[3][j][1])*t*t*t + (3*q[0][j][1] -6*q[1][j][1] +3*q[2][j][1])*t*t + (-3*q[0][j][1] +3*q[1][j][1])*t + q[0][j][1];
+                res[2] = (-q[0][j][2] +3*q[1][j][2] -3*q[2][j][2] +q[3][j][2])*t*t*t + (3*q[0][j][2] -6*q[1][j][2] +3*q[2][j][2])*t*t + (-3*q[0][j][2] +3*q[1][j][2])*t + q[0][j][2];
+
+                r[j][k][0] = res[0];
+                r[j][k][1] = res[1];
+                r[j][k][2] = res[2];
+                k=0;
+            }
+
+            for(int i=0; i<tesselation-1; i++)
+                for(int j=0; j<tesselation-1; j++){
+                    g << r[i][j][0];   g << ' '; g << r[i][j][1];   g << ' '; g << r[i][j][2];   g << '\n';
+                    g << r[i+1][j][0]; g << ' '; g << r[i+1][j][1]; g << ' '; g <<r[i+1][j][2];  g << '\n';
+                    g << r[i][j+1][0]; g << ' '; g << r[i][j+1][1]; g << ' '; g << r[i][j+1][2]; g << '\n';
+
+                    g << r[i+1][j][0];   g << ' '; g << r[i+1][j][1];   g << ' '; g << r[i+1][j][2];   g << '\n';
+                    g << r[i+1][j+1][0]; g << ' '; g << r[i+1][j+1][1]; g << ' '; g << r[i+1][j+1][2]; g << '\n';
+                    g << r[i][j+1][0];   g << ' '; g << r[i][j+1][1];   g << ' '; g << r[i][j+1][2];   g << '\n';
+                }
         }
+        g.close();
     }
-
-    filei.close();
-    fileo.close();
+    else { printf("Error: Cannot open file...\n"); exit(0); }
 }
-
 
 
 
@@ -659,7 +670,7 @@ int main(int argc, char **argv)
             showSintaxError();
         char *file = argv[2];
         filename = argv[4];
-        patch(file,atoi(argv[3]),filename);
+        createBezierPatch(file,atoi(argv[3]),filename.c_str());
     }
     else
         showSintaxError();
