@@ -1,6 +1,7 @@
 #ifdef __APPLE__
 #include <GLUT/glut.h>
 #else
+#include <GL/glew.h>
 #include <GL/glut.h>
 
 #include <utility>
@@ -34,6 +35,11 @@ bool frontCull = false;
 /* Change the way color is displayed True-> Use 2 alternating colors for faces False-> Use 1 color for faces*/
 bool alternatingColorFaces = false;
 
+/* Draw with VBOs or immediate mode*/
+bool vbo = true;
+
+int timebase, frame = 0;
+
 /* Global time */
 float t = 0;
 
@@ -46,6 +52,8 @@ list<Model> modelsToDraw;
 //Configuração da camera atual
 CameraConfig cameraConfig;
 
+GLuint buffers[1];
+
 /* Desenhar um determinado modelo */
 void Model::drawModel() const {
     int i = 0;
@@ -54,25 +62,44 @@ void Model::drawModel() const {
     for( Transformation transformation : this->transformations){
         transformation.applyTransformation();
     }
-    for(Point point: points){
-        string line;
-        //Togle between wireframe and fill
+    float vertex[points.size()*3];
+    int index = 0;
+    for(Point point :points){
+        vertex[index] = point.x;
+        vertex[index+1] = point.y;
+        vertex[index+2] = point.z;
+        index += 3;
+    }
+    if(vbo){
+        glGenBuffers(1,buffers);
+        glBindBuffer(GL_ARRAY_BUFFER,buffers[0]);
+        glBufferData(GL_ARRAY_BUFFER,sizeof (float) * points.size()*3, vertex, GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER,buffers[0]);
+        glVertexPointer(3,GL_FLOAT,0,0);
         if(drawModeFill) glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
         else glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-        //Draw model
-        glBegin(GL_TRIANGLES);
-        //Draw faces using 2 alternating colors ignoring color info
-        if(drawModeFill && alternatingColorFaces){
-            if(i % 3 == 0) {
-                color == 0? color = 1: color = 0;
+        glDrawArrays(GL_TRIANGLES, 0, points.size()*3);
+    } else{
+        for(Point point: points){
+            string line;
+            //Togle between wireframe and fill
+            if(drawModeFill) glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+            else glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+            //Draw model
+            glBegin(GL_TRIANGLES);
+            //Draw faces using 2 alternating colors ignoring color info
+            if(drawModeFill && alternatingColorFaces){
+                if(i % 3 == 0) {
+                    color == 0? color = 1: color = 0;
+                }
+                i++;
+                glColor3f(color, 1-color, 1-color);
             }
-            i++;
-            glColor3f(color, 1-color, 1-color);
+            //Draw vertex
+            glVertex3f(point.x,point.y,point.z);
         }
-        //Draw vertex
-        glVertex3f(point.x,point.y,point.z);
+        glEnd();
     }
-    glEnd();
     glPopMatrix();
 }
 
@@ -108,21 +135,15 @@ void CameraConfig::printOut() {
 void renderCatmullRomCurve(std::list<Point> PointList) {
     float pos[3];
     float deriv[3];
-    glBegin(GL_LINE_LOOP);
     float gt = 0;
     while (gt < 1) {
         getGlobalCatmullRomPoint(gt, pos, deriv,PointList);
+        glBegin(GL_LINE_LOOP);
         glVertex3f(pos[0], pos[1], pos[2]);
+
         gt += 1.0 / tesselation;
     }
-    /*glBegin(GL_LINE);
-    while (gt < 1) {
-        getGlobalCatmullRomPoint(gt, pos, deriv);
-        glVertex3f(pos[0],pos[1],pos[2]);
-        glVertex3f(deriv[0]*5,deriv[1]*5,deriv[2]*5);
-        gt += 1.0/TESSELATION;
-    }*/
-    glEnd();
+     glEnd();
 }
 /* Apply tranformation to model */
 void Transformation::applyTransformation() {
@@ -401,7 +422,21 @@ void drawAxis(float size){
     glEnd();
 }
 
+string getWindowTitle(){
+    string windowTitle = "File: [ " + xmlFile + "]   ";
+    drawAxisBool? windowTitle += "AXIS: TRUE |" :windowTitle += + "AXIS: FALSE|";
+    frontCull? windowTitle += " CULL: BACK |" :windowTitle += " CULL: FRONT|";
+    drawModeFill? windowTitle += " DRAW: FILL|" :windowTitle += " DRAW: LINE|";
+    alternatingColorFaces? windowTitle += " COLOR: 2 |" :windowTitle += " COLOR: ANY|";
+    vbo? windowTitle += " VBO: ON|" : windowTitle += " VBO: OFF|";
+    windowTitle += " TESSELATION: " + to_string(tesselation);
+    return windowTitle;
+}
+
 void renderScene(void) {
+    float fps;
+    int time;
+
     // clear buffers
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -418,23 +453,21 @@ void renderScene(void) {
     }
     //draw axis if enabled
     if(drawAxisBool) drawAxis(1000);
+
+    frame++;
+    time=glutGet(GLUT_ELAPSED_TIME);
+    if (time - timebase > 1000) {
+        fps = frame*1000.0/(time-timebase);
+        timebase = time;
+        frame = 0;
+        string fpsTitle = getWindowTitle() + "| FPS: " + to_string(fps);
+        glutSetWindowTitle(fpsTitle.c_str());
+    }
     // End of frame
     glutSwapBuffers();
     t += 0.001;
     glutPostRedisplay();
 }
-
-string getWindowTitle(){
-    string windowTitle = "File: [ " + xmlFile + "]   ";
-    drawAxisBool? windowTitle += "AXIS: TRUE |" :windowTitle += + "AXIS: FALSE|";
-    frontCull? windowTitle += " CULL: BACK |" :windowTitle += " CULL: FRONT|";
-    drawModeFill? windowTitle += " DRAW: FILL|" :windowTitle += " DRAW: LINE|";
-    alternatingColorFaces? windowTitle += " COLOR: 2  " :windowTitle += " COLOR: ANY";
-    windowTitle += "| TESSELATION: " + to_string(tesselation);
-    return windowTitle;
-}
-
-
 
 void processKeys(unsigned char c, int xx, int yy) {
 
@@ -477,10 +510,12 @@ void processSpecialKeys(int key, int xx, int yy) {
             alternatingColorFaces ? alternatingColorFaces = false : alternatingColorFaces = true;
             break;
         case GLUT_KEY_F5:
+            vbo ? vbo = false: vbo = true;
+        case GLUT_KEY_F6:
             if(tesselation <= 5) tesselation = 5;
             tesselation -= 5;
             break;
-        case GLUT_KEY_F6:
+        case GLUT_KEY_F7:
             tesselation += 5;
             break;
     }
@@ -519,6 +554,8 @@ int main(int argc, char **argv) {
     glutInitWindowPosition(100,100);
     glutInitWindowSize(800,800);
     glutCreateWindow(getWindowTitle().c_str());
+
+
 // Required callback registry
     glutDisplayFunc(renderScene);
     glutReshapeFunc(changeSize);
@@ -527,11 +564,16 @@ int main(int argc, char **argv) {
     glutKeyboardFunc(processKeys);
     glutSpecialFunc(processSpecialKeys);
 
+#ifndef __APPLE__
+// init GLEW
+    glewInit();
+#endif
 //  OpenGL settings
     glEnable(GL_DEPTH_TEST);
+
     glEnable(GL_CULL_FACE);
     //glCullFace(GL_FRONT);
-
+    glEnableClientState(GL_VERTEX_ARRAY);
 // enter GLUT's main cycle
     glutMainLoop();
     return 1;

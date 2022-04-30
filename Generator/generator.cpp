@@ -4,8 +4,13 @@
 #include <GL/glut.h>
 #endif
 #include "generator.h"
-#include "fstream"
+#include <stdio.h>
 #include <string.h>
+#include <iostream>
+#include <fstream>
+#include <stdlib.h>
+#include "sstream"
+
 #define _USE_MATH_DEFINES
 #include <math.h>
 
@@ -471,154 +476,149 @@ void showSintaxError()
     printf("    box: [size] [divisions]\n");
     printf("    sphere: [radious] [slices] [height]\n");
     printf("    cone: [radious] [heigth] [Slices] [stacks]\n");
+    printf("    bezier: [.patch file] [Tesselation]\n");
     exit(-1);
 }
 
-void getBezierPoint(float u, float v, float **matrixX, float **matrixY, float **matrixZ, float *pos)
-{
-    float bezierMatrix[4][4] = {{-1.0f, 3.0f, -3.0f, 1.0f},
-                                {3.0f, -6.0f, 3.0f, 0.0f},
-                                {-3.0f, 3.0f, 0.0f, 0.0f},
-                                {1.0f, 0.0f, 0.0f, 0.0f}};
+float* formulaBezier( float tt, float *p1 , float *p2 , float *p3 , float *p4) {
 
-    float vetorU[4] = {u * u * u, u * u, u, 1};
-    float vetorV[4] = {v * v * v, v * v, v, 1};
+    float ite = 1.0 - tt;
+    float* ppt = new float[3];
 
-    float vetorAux[4];
-    float px[4];
-    float py[4];
-    float pz[4];
+    float x0 , x1 , x2 , x3;
+    x0 = pow(ite,3);
+    x1 = 3 * tt*pow(ite,2);
+    x2 = 3 * tt * tt * ite;
+    x3 = tt * tt * tt;
 
-    float mx[4];
-    float my[4];
-    float mz[4];
+    ppt[0] = x0*p1[0] + x1*p2[0] + x2*p3[0] + x3*p4[0];
+    ppt[1] = x0*p1[1] + x1*p2[1] + x2*p3[1] + x3*p4[1];
+    ppt[2] = x0*p1[2] + x1*p2[2] + x2*p3[2] + x3*p4[2];
 
-    multMatrixVector((float *)bezierMatrix, vetorV, vetorAux);
-    multMatrixVector((float *)matrixX, vetorAux, px);
-    multMatrixVector((float *)matrixY, vetorAux, py);
-    multMatrixVector((float *)matrixZ, vetorAux, pz);
 
-    multMatrixVector((float *)bezierMatrix, px, mx);
-    multMatrixVector((float *)bezierMatrix, py, my);
-    multMatrixVector((float *)bezierMatrix, pz, mz);
-
-    pos[0] = (vetorU[0] * mx[0]) + (vetorU[1] * mx[1]) + (vetorU[2] * mx[2]) + (vetorU[3] * mx[3]);
-    pos[1] = (vetorU[0] * my[0]) + (vetorU[1] * my[1]) + (vetorU[2] * my[2]) + (vetorU[3] * my[3]);
-    pos[2] = (vetorU[0] * mz[0]) + (vetorU[1] * mz[1]) + (vetorU[2] * mz[2]) + (vetorU[3] * mz[3]);
+    return ppt;
 }
 
-void generateBezierPatches(std::vector<int> verticesX, std::vector<int> verticesY, std::vector<int> verticesZ, std::vector<int> pIndexes, int tecelagem)
-{
-    fstream file;
-    file.open(filename, ios::out);
-    float pos[4][3];
-    float matrixX[4][4];
-    float matrixY[4][4];
-    float matrixZ[4][4];
 
-    float u = 0;
-    float v = 0;
-    float inc = 1 / (float)tecelagem;
+float* bezier( float a , float b , int* indice , float** pontos , int ni , int np) {
 
-    for (int p = 0; p < pIndexes.size(); p += 16)
-    {
-        for (int i = 0; i < tecelagem; i++)
-        {
-            for (int j = 0; j < tecelagem; j++)
-            {
-                u = inc * i;
-                v = inc * j;
-                float u2 = inc * (i + 1);
-                float v2 = inc * (j + 1);
+    float* ponto = new float[3];
+    float altp[4][3];
+    float res[4][3];
+    int i , j = 0 , x = 0;
+    float *calculo;
 
-                for (int a = 0; a < 4; a++)
-                {
-                    for (int b = 0; b < 4; b++)
-                    {
-                        matrixX[a][b] = verticesX.at(pIndexes.at(p + a * 4 + b));
-                        matrixY[a][b] = verticesY.at(pIndexes.at(p + a * 4 + b));
-                        matrixZ[a][b] = verticesZ.at(pIndexes.at(p + a * 4 + b));
-                    }
+
+    for( i = 0 ; i < 16 ; i++) {
+        altp[j][0] = pontos[indice[i]][0];
+        altp[j][0] = pontos[indice[i]][1];
+        altp[j][0] = pontos[indice[i]][2];
+
+        j++;
+
+        if( j % 4 == 0 ) {
+            ponto = formulaBezier(a,altp[0],altp[1],altp[2],altp[3]);
+            res[x][0] = ponto[0];
+            res[x][1] = ponto[1];
+            res[x][2] = ponto[2];
+
+            x++;
+
+            j = 0;
+        }
+
+    }
+    calculo = formulaBezier(b,res[0],res[1],res[2],res[3]);
+
+    return calculo;
+}
+
+
+void patch( string file , int tess , string name) {
+
+    //abrir ficheiros de input e output
+
+    ofstream fileo(name);
+    string line , aux;
+    ifstream filei(file);
+    int i;
+
+    //get patch
+    if(filei.is_open()) {
+        getline(filei,line);
+        int npatch = atoi(line.c_str());
+        int** indices = new int*[npatch];
+        cout << npatch << endl;
+
+        for(int r = 0 ; r < npatch ; r++) {
+            getline(filei,line);
+            indices[r] = new int[16];
+
+            for(int j = 0 ; j < 16 ; j++) {
+                i = line.find(",");
+                aux = line.substr(0,i);
+                indices[r][j] = atoi(aux.c_str());
+                line.erase(0, i + 1);
+            }
+        }
+
+        getline(filei,line);
+        int npontos = atoi(line.c_str());
+        cout << npontos << endl;
+        float** pontos = new float*[npontos];
+
+        //get pontos
+        for( int m = 0 ; m < npontos ; m++){
+            getline(filei,line);
+            pontos[m] = new float[3];
+            for( int l = 0 ; l < 3 ; l++) {
+                i = line.find(",");
+                aux = line.substr(0,i);
+                pontos[m][l] = atof(aux.c_str());
+                line.erase(0 , i + 1);
+            }
+        }
+
+        float incre = 1.0 / tess , u , v , u2 , v2;
+        float *** pontoRes = new float**[npatch];
+
+        for(int rr = 0 ; rr < npatch ; rr++) {
+            pontoRes[rr] = new float*[4];
+            //escrever pontos
+            for( int jj = 0 ; jj < tess ; jj++) {
+
+                for( int mn = 0 ; mn < tess ; mn++) {
+
+                    u = jj*incre;
+                    v = mn*incre;
+                    u2 = (jj + 1)* incre;
+                    v2 = (mn + 1)* incre;
+
+                    pontoRes[rr][0] = bezier(u, v, indices[rr], pontos, npatch, npontos);
+                    pontoRes[rr][1] = bezier(u, v2, indices[rr], pontos, npatch, npontos);
+                    pontoRes[rr][2] = bezier(u2, v, indices[rr], pontos, npatch, npontos);
+                    pontoRes[rr][3] = bezier(u2, v2, indices[rr], pontos, npatch, npontos);
+
+
+                    fileo << pontoRes[rr][0][0] << "," << pontoRes[rr][0][1] << "," << pontoRes[rr][0][2] << endl;
+                    fileo << pontoRes[rr][2][0] << "," << pontoRes[rr][2][1] << "," << pontoRes[rr][2][2] << endl;
+                    fileo << pontoRes[rr][3][0] << "," << pontoRes[rr][3][1] << "," << pontoRes[rr][3][2] << endl;
+
+                    fileo << pontoRes[rr][0][0] << "," << pontoRes[rr][0][1] << "," << pontoRes[rr][0][2] << endl;
+                    fileo << pontoRes[rr][3][0] << "," << pontoRes[rr][3][1] << "," << pontoRes[rr][3][2] << endl;
+                    fileo << pontoRes[rr][1][0] << "," << pontoRes[rr][1][1] << "," << pontoRes[rr][1][2] << endl;
                 }
-
-                getBezierPoint(u, v, (float **)matrixX, (float **)matrixY, (float **)matrixZ, pos[0]);
-                getBezierPoint(u, v2, (float **)matrixX, (float **)matrixY, (float **)matrixZ, pos[1]);
-                getBezierPoint(u2, v, (float **)matrixX, (float **)matrixY, (float **)matrixZ, pos[2]);
-                getBezierPoint(u2, v2, (float **)matrixX, (float **)matrixY, (float **)matrixZ, pos[3]);
-
-                file << pos[3][0] << " " << pos[3][1] << " " << pos[3][2]) << "\n";
-                file << pos[2][0] << " " << pos[2][1] << " " << pos[2][2]) << "\n";
-                file << pos[0][0] << " " << pos[0][1] << " " << pos[0][2]) << "\n";
-
-                file << pos[0][0] << " " << pos[0][1] << " " << pos[0][2]) << "\n";
-                file << pos[1][0] << " " << pos[1][1] << " " << pos[1][2]) << "\n";
-                file << pos[3][0] << " " << pos[3][1] << " " << pos[3][2]) << "\n";
-            }
-        }
-    }
-}
-
-void createBezier(char *file, float t)
-{
-    fstream f;
-    f.open(file);
-    char *line;
-    int numPatches = 0;
-    int linha = 0;
-    char *delimiter = ",";
-
-    std::vector<int> auxIndices;
-    std::vector<int> auxVerticesX;
-    std::vector<int> auxVerticesY;
-    std::vector<int> auxVerticesZ;
-
-    while (getline(f, line))
-    {
-        if (linha == 0)
-        {
-            numPatches = atoi(line.c_str());
-            std::cout << "numPatches: " << numPatches << std::endl;
-        }
-        if (linha >= 1 && linha <= numPatches)
-        {
-            char* token;
-            int pos = 0;
-            std::istringstream tokenizer(line);
-
-            for (int i = 0; i < 15; i++)
-            {
-                std::getline(tokenizer, token, ',');
-                auxIndices.push_back(atof(token));
             }
 
-            std::getline(tokenizer, token);
-            auxIndices.push_back(atof(token));
         }
-        if (linha > numPatches + 1)
-        {
-            char* token;
-            int pos = 0;
-            int i = 0;
-            float coord[3];
-            char* tokens[3];
-            std::istringstream tokenizer(line);
-
-            std::getline(tokenizer, tokens[0], ','); 
-            std::getline(tokenizer, tokens[1], ',');
-            std::getline(tokenizer, tokens[2]);
-
-            //auxVertices.addPoint(stof(tokens[0]), stof(tokens[1]), stof(tokens[2]));
-            auxVerticesX.push_back(atof(tokens[0]));
-            auxVerticesY.push_back(atof(tokens[1]));
-            auxVerticesZ.push_back(atof(tokens[2]));
-        }
-        linha++;
     }
 
-    f.close();
-
-    generateBezierPatches(auxVerticesX, auxVerticesY, auxVerticesZ, auxIndices, t);
+    filei.close();
+    fileo.close();
 }
+
+
+
 
 int main(int argc, char **argv)
 {
@@ -659,7 +659,7 @@ int main(int argc, char **argv)
             showSintaxError();
         char *file = argv[2];
         filename = argv[4];
-        createBezier(file, atof(argv[3]));
+        patch(file,atoi(argv[3]),filename);
     }
     else
         showSintaxError();
