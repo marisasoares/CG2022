@@ -282,57 +282,62 @@ void readCameraXMLConfigurations(TiXmlElement* root){
 /* Read transformations from o group */
 list<Transformation> readTransformation(TiXmlElement* element){
     list<Transformation> transformationList{};
-    for(TiXmlElement* element2 = element -> FirstChildElement("transform")->FirstChildElement(); element2 != nullptr ; element2 = element2->NextSiblingElement()){
-        Transformation transformation{};
-        if(strcmp(element2->Value(),"color") == 0){
-            transformation.type = 3;
-            transformation.angle = 0;
-            transformation.color_r = atof(element2->Attribute("r"));
-            transformation.color_g = atof(element2->Attribute("g"));
-            transformation.color_b = atof(element2->Attribute("b"));
-            transformationList.push_back(transformation);
-        }
-        if(strcmp(element2->Value(),"translate") == 0){
-            transformation.type = 0;
-            transformation.angle = 0;
-            if(element2->Attribute("x")) transformation.x = atof(element2->Attribute("x"));
-            else transformation.x = 0;
-            if(element2->Attribute("y")) transformation.y = atof(element2->Attribute("y"));
-            else transformation.y = 0;
-            if(element2->Attribute("z")) transformation.z = atof(element2->Attribute("z"));
-            else transformation.z = 0;
-            /* Catmull-Rom curve information */
-            if(element2 ->Attribute("time")) transformation.time = atof(element2 ->Attribute("time"));
-            if(element2 ->Attribute("align")){
-                if(strcmp(element2->Attribute("align"),"false") == 0 || strcmp(element2->Attribute("align"),"False") == 0 )
-                    transformation.align = false;
+    if(element ->FirstChildElement("transform") != NULL){
+        for (TiXmlElement *element2 = element->FirstChildElement("transform")->FirstChildElement();
+             element2 != nullptr; element2 = element2->NextSiblingElement()) {
+            Transformation transformation{};
+            if (strcmp(element2->Value(), "color") == 0) {
+                transformation.type = 3;
+                transformation.angle = 0;
+                transformation.color_r = atof(element2->Attribute("r"));
+                transformation.color_g = atof(element2->Attribute("g"));
+                transformation.color_b = atof(element2->Attribute("b"));
+                transformationList.push_back(transformation);
             }
-            /* Read Catmull-Rom curve points */
-            for(TiXmlElement* element3 = element2 -> FirstChildElement("point"); element3 != nullptr ; element3 = element3->NextSiblingElement()){
-                Point p{};
-                p.x = atof(element3->Attribute("x"));
-                p.y = atof(element3->Attribute("y"));
-                p.z = atof(element3->Attribute("z"));
-                transformation.catmullRomPoints.push_back(p);
+            if (strcmp(element2->Value(), "translate") == 0) {
+                transformation.type = 0;
+                transformation.angle = 0;
+                if (element2->Attribute("x")) transformation.x = atof(element2->Attribute("x"));
+                else transformation.x = 0;
+                if (element2->Attribute("y")) transformation.y = atof(element2->Attribute("y"));
+                else transformation.y = 0;
+                if (element2->Attribute("z")) transformation.z = atof(element2->Attribute("z"));
+                else transformation.z = 0;
+                /* Catmull-Rom curve information */
+                if (element2->Attribute("time")) transformation.time = atof(element2->Attribute("time"));
+                if (element2->Attribute("align")) {
+                    if (strcmp(element2->Attribute("align"), "false") == 0 ||
+                        strcmp(element2->Attribute("align"), "False") == 0)
+                        transformation.align = false;
+                }
+                /* Read Catmull-Rom curve points */
+                for (TiXmlElement *element3 = element2->FirstChildElement("point");
+                     element3 != nullptr; element3 = element3->NextSiblingElement()) {
+                    Point p{};
+                    p.x = atof(element3->Attribute("x"));
+                    p.y = atof(element3->Attribute("y"));
+                    p.z = atof(element3->Attribute("z"));
+                    transformation.catmullRomPoints.push_back(p);
+                }
+                transformationList.push_back(transformation);
             }
-            transformationList.push_back(transformation);
-        }
-        if(strcmp(element2->Value(),"rotate") == 0){
-            transformation.type = 1;
-            if(element2 ->Attribute("angle")) transformation.angle = atof(element2->Attribute("angle"));
-            transformation.x = atof(element2->Attribute("x"));
-            transformation.y = atof(element2->Attribute("y"));
-            transformation.z = atof(element2->Attribute("z"));
-            if(element2 ->Attribute("time")) transformation.time = atof(element2 ->Attribute("time"));
-            transformationList.push_back(transformation);
-        }
-        if(strcmp(element2->Value(),"scale") == 0){
-            transformation.type = 2;
-            transformation.angle = 0;
-            transformation.x = atof(element2->Attribute("x"));
-            transformation.y = atof(element2->Attribute("y"));
-            transformation.z = atof(element2->Attribute("z"));
-            transformationList.push_back(transformation);
+            if (strcmp(element2->Value(), "rotate") == 0) {
+                transformation.type = 1;
+                if (element2->Attribute("angle")) transformation.angle = atof(element2->Attribute("angle"));
+                transformation.x = atof(element2->Attribute("x"));
+                transformation.y = atof(element2->Attribute("y"));
+                transformation.z = atof(element2->Attribute("z"));
+                if (element2->Attribute("time")) transformation.time = atof(element2->Attribute("time"));
+                transformationList.push_back(transformation);
+            }
+            if (strcmp(element2->Value(), "scale") == 0) {
+                transformation.type = 2;
+                transformation.angle = 0;
+                transformation.x = atof(element2->Attribute("x"));
+                transformation.y = atof(element2->Attribute("y"));
+                transformation.z = atof(element2->Attribute("z"));
+                transformationList.push_back(transformation);
+            }
         }
     }
     return transformationList;
@@ -341,9 +346,11 @@ list<Transformation> readTransformation(TiXmlElement* element){
 /* Read model file from group */
 Model readModel(TiXmlElement* element){
     Model model;
-    for(TiXmlElement* element2 = element -> FirstChildElement("models")->FirstChildElement(); element2 != nullptr ; element2 = element2->NextSiblingElement()){
-        const char *modelFile = element2->Attribute("file");
-        model = openFileAndLoadModel(modelFile);
+    if(element ->FirstChildElement("models") != NULL){
+        for(TiXmlElement* element2 = element -> FirstChildElement("models")->FirstChildElement(); element2 != nullptr ; element2 = element2->NextSiblingElement()){
+            const char *modelFile = element2->Attribute("file");
+            model = openFileAndLoadModel(modelFile);
+        }
     }
     return model;
 }
