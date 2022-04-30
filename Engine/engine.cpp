@@ -518,6 +518,7 @@ void processSpecialKeys(int key, int xx, int yy) {
             break;
         case GLUT_KEY_F5:
             vbo ? vbo = false: vbo = true;
+            break;
         case GLUT_KEY_F6:
             if(tesselation <= 5) tesselation = 5;
             tesselation -= 5;
