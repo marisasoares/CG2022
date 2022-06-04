@@ -1,10 +1,10 @@
 <world>
     <lights>
-        <light type="point" posX="0" posY="10" posZ="0" />
+        <!--light type="point" posX="0" posY="10" posZ="0" /-->
         <light type="directional" dirX="1" dirY="1" dirZ="1"/>
-        <light type="spotlight" posX="0" posY="10" posZ="0"
+        <!--light type="spotlight" posX="0" posY="10" posZ="0"
                dirX="1" dirY="1" dirZ="1"
-               cutoff="45" />
+               cutoff="45" /-->
     </lights>
     <!-- if color is not specified, use the values
     below as default -->
@@ -50,7 +50,6 @@
     <!-- Asteroid 2 -->
     <group>
         <transform>
-            <color r="120" g="120" b="120" />
             <rotate angle="-145" x="1" y="0" z="0"/>
             <translate time="17" align="true">
                 <point x="360" y="0" z="0" />
@@ -67,18 +66,35 @@
 
         </transform>
         <models>
-            <model file="box.3d" />
+            <model file="box.3d">
+            <color>
+                <diffuse R="0" G="0" B="250" />
+                <ambient R="50" G="50" B="50" />
+                <specular R="100" G="100" B="100" />
+                <emissive R="0" G="0" B="0" />
+                <shininess value="128" />
+            </color>
+            </model>
         </models>
     </group>
     <!-- Sun -->
     <group>
         <transform>
-            <color r="255" g="239" b="0" />
             <translate x="0" y="0" z="0" />
             <scale x="20" y="20" z="20" />
         </transform>
         <models>
-            <model file="sphere.3d" />
+            <model file="box.3d">
+                <texture file="sun.png"/>
+            <color>
+                <diffuse R="130" G="234" B="0" />
+                <ambient R="50" G="50" B="50" />
+                <specular R="56" G="230" B="0" />
+                <emissive R="0" G="0" B="0" />
+                <shininess value="30" />
+            </color>
+            </model>
+
         </models>
     </group>
 </world>

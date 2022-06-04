@@ -77,10 +77,10 @@ public:
     std::list<Point> normals;
     std::list<Transformation> transformations{};
     std::string texture = "NaN";
-    float difuse_color[3] = {200,200,200};
-    float ambient_color[3] = {50,50,50};
-    float specular_color[3] = {0,0,0};
-    float emissive_color[3] = {0,0,0};
+    float difuse_color[4] = {200,200,200,1};
+    float ambient_color[4] = {50,50,50,1};
+    float specular_color[4] = {0,0,0,1};
+    float emissive_color[4] = {0,0,0,1};
     float shininess = 0;
     void drawModel() const;
     void printOut();
@@ -89,9 +89,9 @@ public:
 class Light {
 public:
     std::string type;
-    int posicao[3] = {0,10,0};
-    int direcao[3] = {1,1,1};
-    int cutoff = 45;
+    float posicao[3] = {0,10,0};
+    float direcao[3] = {1,1,1};
+    float cutoff = 45;
     void drawLight();
     void printOut();
 };

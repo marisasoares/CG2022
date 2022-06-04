@@ -54,7 +54,7 @@ list<Light> lightsToDraw;
 //Configuração da camera atual
 CameraConfig cameraConfig;
 
-GLuint buffers[1];
+GLuint buffers[2];
 
 /* Desenhar um determinado modelo */
 void Model::drawModel() const {
@@ -65,6 +65,7 @@ void Model::drawModel() const {
         transformation.applyTransformation();
     }
     float vertex[points.size()*3];
+    float normalB[normals.size()*3];
     int index = 0;
     for(Point point :points){
         vertex[index] = point.x;
@@ -72,12 +73,34 @@ void Model::drawModel() const {
         vertex[index+2] = point.z;
         index += 3;
     }
+    if(!normals.empty()){
+        index = 0;
+        for(Point point :normals){
+            normalB[index] = point.x;
+            normalB[index+1] = point.y;
+            normalB[index+2] = point.z;
+            index += 3;
+        }
+    } else{
+        index = 0;
+        for(Point point :points){
+            normalB[index] = 0;
+            normalB[index+1] = 1;
+            normalB[index+2] = 0;
+            index += 3;
+        }
+    }
+
     if(vbo){
-        glGenBuffers(1,buffers);
+        glGenBuffers(2,buffers);
         glBindBuffer(GL_ARRAY_BUFFER,buffers[0]);
         glBufferData(GL_ARRAY_BUFFER,sizeof (float) * points.size()*3, vertex, GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, buffers[1]);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * points.size()*3, normalB, GL_STATIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER,buffers[0]);
         glVertexPointer(3,GL_FLOAT,0,0);
+        glBindBuffer(GL_ARRAY_BUFFER,buffers[1]);
+        glNormalPointer(GL_FLOAT,0,0);
         if(drawModeFill) glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
         else glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
         glDrawArrays(GL_TRIANGLES, 0, points.size()*3);
@@ -366,32 +389,35 @@ list<Transformation> readTransformation(TiXmlElement* element){
 }
 
 /* Read color group from XML file */
-void readColorGroup(TiXmlElement* element,Model model){
+void readColorGroup(TiXmlElement* element,Model* model){
     if(element ->FirstChildElement("color") != NULL){
         for (TiXmlElement *element2 = element->FirstChildElement("color")->FirstChildElement();
              element2 != nullptr; element2 = element2->NextSiblingElement()) {
             if (strcmp(element2->Value(), "diffuse") == 0) {
-                model.difuse_color[0] =  atof(element2->Attribute("R"));
-                model.difuse_color[1] =  atof(element2->Attribute("G"));
-                model.difuse_color[2] =  atof(element2->Attribute("B"));
+                model->difuse_color[0] =  atof(element2->Attribute("R"))/255;
+                model->difuse_color[1] =  atof(element2->Attribute("G"))/255;
+                model->difuse_color[2] =  atof(element2->Attribute("B"))/255;
             }
             if (strcmp(element2->Value(), "ambient") == 0) {
-                model.ambient_color[0] =  atof(element2->Attribute("R"));
-                model.ambient_color[1] =  atof(element2->Attribute("G"));
-                model.ambient_color[2] =  atof(element2->Attribute("B"));
+                model->ambient_color[0] =  atof(element2->Attribute("R"))/255;
+                model->ambient_color[1] =  atof(element2->Attribute("G"))/255;
+                model->ambient_color[2] =  atof(element2->Attribute("B"))/255;
+
             }
             if (strcmp(element2->Value(), "specular") == 0) {
-                model.specular_color[0] =  atof(element2->Attribute("R"));
-                model.specular_color[1] =  atof(element2->Attribute("G"));
-                model.specular_color[2] =  atof(element2->Attribute("B"));
+                model->specular_color[0] =  atof(element2->Attribute("R"))/255;
+                model->specular_color[1] =  atof(element2->Attribute("G"))/255;
+                model->specular_color[2] =  atof(element2->Attribute("B"))/255;
+
             }
             if (strcmp(element2->Value(), "emissive") == 0) {
-                model.emissive_color[0] =  atof(element2->Attribute("R"));
-                model.emissive_color[1] =  atof(element2->Attribute("G"));
-                model.emissive_color[2] =  atof(element2->Attribute("B"));
+                model->emissive_color[0] =  atof(element2->Attribute("R"))/255;
+                model->emissive_color[1] =  atof(element2->Attribute("G"))/255;
+                model->emissive_color[2] =  atof(element2->Attribute("B"))/255;
+
             }
             if (strcmp(element2->Value(), "shininess") == 0){
-                model.shininess = atof(element2->Attribute("value"));
+                model->shininess = atof(element2->Attribute("value"));
             }
         }
     }
@@ -399,7 +425,7 @@ void readColorGroup(TiXmlElement* element,Model model){
 
 /* Read model file from group */
 Model readModel(TiXmlElement* element){
-    Model model;
+    Model model{};
     if(element ->FirstChildElement("models") != NULL){
         for(TiXmlElement* element2 = element -> FirstChildElement("models")->FirstChildElement(); element2 != nullptr ; element2 = element2->NextSiblingElement()) {
             const char *modelFile = element2->Attribute("file");
@@ -408,7 +434,7 @@ Model readModel(TiXmlElement* element){
                 string texture = element2->FirstChildElement("texture")->Attribute("file");
                 model.texture = texture;
             }
-            readColorGroup(element2, model);
+            readColorGroup(element -> FirstChildElement("models")->FirstChildElement(), &model);
         }
     }
     return model;
@@ -548,7 +574,7 @@ string getWindowTitle(){
 void renderScene(void) {
     float fps;
     int time;
-
+    glClearColor(0.0f,0.0f,0.0f,0.0f);
     // clear buffers
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -559,8 +585,34 @@ void renderScene(void) {
               cameraConfig.lookAtX,cameraConfig.lookAtY,cameraConfig.lookAtZ,
               cameraConfig.upX,cameraConfig.upY,cameraConfig.upZ);
 
+    int index = 0;
+    for (Light l: lightsToDraw) {
+        if(index >= 8) break;
+        if(l.type.compare("point") == 0){
+            float pos[4] = {l.posicao[0],l.posicao[1],l.posicao[2],0};
+            glLightfv(0x4000+index,GL_POSITION,pos);
+        }else if(l.type.compare("directional") == 0){
+            float pos[4] = {l.posicao[0],l.posicao[1],l.posicao[2],1};
+            glLightfv(0x4000+index,GL_POSITION,pos);
+            float direction[4] = {l.direcao[0],l.direcao[1],l.direcao[2]};
+            glLightfv(0x4000+index,GL_SPOT_DIRECTION,direction);
+        }else if(l.type.compare("spotlight") == 0){
+            float pos[4] = {l.posicao[0],l.posicao[1],l.posicao[2],0};
+            glLightfv(0x4000+index,GL_POSITION,pos);
+            float direction[4] = {l.direcao[0],l.direcao[1],l.direcao[2]};
+            glLightfv(0x4000+index,GL_SPOT_DIRECTION,direction);
+            glLightf(0x4000+index,GL_SPOT_CUTOFF,l.cutoff);
+        }
+        index++;
+    }
+
     // For each pair model list<transformation> apply transformations and draw model
     for(const Model& model:  modelsToDraw) {
+        glMaterialfv(GL_FRONT, GL_DIFFUSE, model.difuse_color);
+        glMaterialfv(GL_FRONT,GL_AMBIENT,model.ambient_color);
+        glMaterialfv(GL_FRONT, GL_SPECULAR, model.specular_color);
+        glMaterialfv(GL_FRONT,GL_EMISSION,model.emissive_color);
+        glMaterialf(GL_FRONT, GL_SHININESS, model.shininess);
         model.drawModel();
     }
     //draw axis if enabled
@@ -690,9 +742,23 @@ int main(int argc, char **argv) {
     glEnable(GL_DEPTH_TEST);
 
     glEnable(GL_CULL_FACE);
-    
-    //glCullFace(GL_FRONT);
+    glEnable(GL_LIGHTING);
+
+    //Define lights
+    GLfloat dark[4] = {0.2, 0.2, 0.2, 1.0};
+    GLfloat white[4] = {1.0, 1.0, 1.0, 1.0};
+    int index = 0;
+    for (Light l : lightsToDraw) {
+        if(index >= 8) break;
+        // Enable LIGHT0(0x4000) to LIGHTi(0x400i)
+        glEnable(0x4000+index);
+        glLightfv(0x4000+index, GL_AMBIENT, dark);
+        glLightfv(0x4000+index, GL_DIFFUSE, white);
+        glLightfv(0x4000+index, GL_SPECULAR, white);
+        index++;
+    }
     glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_NORMAL_ARRAY);
 // enter GLUT's main cycle
     glutMainLoop();
     return 1;
