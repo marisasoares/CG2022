@@ -110,6 +110,8 @@ void Model::printOut() {
     // Print file
     cout << "==Model===========================================\n";
     cout << "Model Filename: " + this->filename + "\n";
+    cout << "Number of points: " + to_string(this->points.size()) + "\n";
+    cout << "Number of normals: " + to_string(this->normals.size()) + "\n";
     cout << "Texture File: " + this->texture + "\n";
     cout << "COLOR INFO -------------------------\n";
     cout << "Emissive R: " + to_string(this->emissive_color[0]) + " G: " + to_string(this->emissive_color[1]) + " B: " + to_string(this->emissive_color[2]) + "\n";
@@ -262,15 +264,19 @@ Model openFileAndLoadModel (const string& filename){
     if(file.is_open()){
         string line;
         float point_x,point_y,point_z;
+        float normal_x,normal_y,normal_z;
         int i = 0;
         float color = 0;
         while (getline(file,line)) {
-            sscanf(line.c_str(),"%f %f %f",&point_x,&point_y,&point_z);
             Point point{};
-            point.x = point_x;
-            point.y = point_y;
-            point.z = point_z;
-            model.points.insert(model.points.end(),point);
+            Point normalVertex{};
+            int fieldsRead = sscanf(line.c_str(),"%f %f %f %f %f %f",&(point.x),&(point.y),&(point.z),&(normalVertex.x),&(normalVertex.y),&(normalVertex.z));
+            if(fieldsRead >= 3 && fieldsRead < 6){
+                model.points.insert(model.points.end(),point);
+            } else if (fieldsRead >= 6){
+                model.points.insert(model.points.end(),point);
+                model.normals.insert(model.normals.end(),normalVertex);
+            }
         }
     } else cout << "File not found: [" << filename << "]\n";
     return model;
@@ -684,6 +690,7 @@ int main(int argc, char **argv) {
     glEnable(GL_DEPTH_TEST);
 
     glEnable(GL_CULL_FACE);
+    
     //glCullFace(GL_FRONT);
     glEnableClientState(GL_VERTEX_ARRAY);
 // enter GLUT's main cycle

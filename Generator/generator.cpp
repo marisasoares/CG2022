@@ -649,6 +649,7 @@ void createCone(float radius, float height, int slices, int stacks)
             file << r2 * sin(theta) << " " << alt2 << " " << r2 * cos(theta) << "\n";
             file << r1 * sin(theta) << " " << alt1 << " " << r1 * cos(theta) << "\n";
 
+            // Normais
             file << sin(nextTheta) << " " << y << " " << cos(nextTheta) << "\n";
             file << sin(nextTheta) << " " << y << " " << cos(nextTheta) << "\n";
             file << sin(theta) << " " << y << " " << cos(theta) << "\n";

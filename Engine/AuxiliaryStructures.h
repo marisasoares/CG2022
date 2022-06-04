@@ -23,9 +23,9 @@ public:
 //Ponto no espaço
 class Point{
 public:
-    float x;
-    float y;
-    float z;
+    float x = 0;
+    float y = 0;
+    float z = 0;
 public:
     float getCoordinate(int index){
         float returnCoordinate;
@@ -74,6 +74,7 @@ class Model {
 public:
     std::string filename = "NaN";
     std::list<Point> points;
+    std::list<Point> normals;
     std::list<Transformation> transformations{};
     std::string texture = "NaN";
     float difuse_color[3] = {200,200,200};

@@ -21,4 +21,4 @@ build/engine-debug:
 	g++ ./Engine/*.cpp  ./Engine/*.h -g -lglut -lGL -lGLU -lXi -lXmu -lGLEW -o ./build/engine-debug 
 
 clean:
-	rm ./build/engine ./build/generator
+	rm ./build/engine ./build/engine-debug ./build/generator
