@@ -1,0 +1,84 @@
+<world>
+    <lights>
+        <light type="point" posX="0" posY="10" posZ="0" />
+        <light type="directional" dirX="1" dirY="1" dirZ="1"/>
+        <light type="spotlight" posX="0" posY="10" posZ="0"
+               dirX="1" dirY="1" dirZ="1"
+               cutoff="45" />
+    </lights>
+    <!-- if color is not specified, use the values
+    below as default -->
+    <camera>
+        <position x="300" y="100" z="300" />
+        <lookAt x="0" y="0" z="0" />
+        <up x="0" y="1" z="0" />
+        <projection fov="60" near="1" far="1000" />
+    </camera>
+    <!-- Asteroid 1 -->
+    <group>
+        <transform>
+            <color r="120" g="120" b="120" />
+            <rotate angle="45" x="1" y="0" z="0"/>
+
+            <translate time="14" align="true">
+                <point x="130" y="0" z="0" />
+                <point x="91,91" y="0" z="91,91" />
+                <point x="0" y="0" z="130"/>
+                <point x="-91,91" y="0" z="91,91" />
+                <point x="-130" y="0" z="0" />
+                <point x="-91,91" y="0" z="-91,91" />
+                <point x="0" y="0" z="-130" />
+                <point x="91,91" y="0" z="-91,91" />
+            </translate>
+            <scale x="1.2" y="1.2" z="1.2" />
+            <rotate time="1" x="0" y="1" z="0"/>
+            <rotate angle="-90" x="1" y="0" z="0"/>
+        </transform>
+        <models>
+            <model file="teapot.3d" >
+                <texture file="earth.jpg" />
+                <color>
+                    <diffuse R="200" G="200" B="200" />
+                    <ambient R="50" G="50" B="50" />
+                    <specular R="0" G="0" B="0" />
+                    <emissive R="0" G="0" B="0" />
+                    <shininess value="0" />
+                </color>
+            </model>
+        </models>
+    </group>
+    <!-- Asteroid 2 -->
+    <group>
+        <transform>
+            <color r="120" g="120" b="120" />
+            <rotate angle="-145" x="1" y="0" z="0"/>
+            <translate time="17" align="true">
+                <point x="360" y="0" z="0" />
+                <point x="254" y="0" z="254" />
+                <point x="0" y="0" z="360"/>
+                <point x="-254" y="0" z="254" />
+                <point x="-360" y="0" z="0" />
+                <point x="-254" y="0" z="-254" />
+                <point x="0" y="0" z="-360" />
+                <point x="254" y="0" z="-254" />
+            </translate>
+            <rotate time="1" x="0" y="1" z="0"/>
+            <scale x="1.2" y="1.2" z="1.2" />
+
+        </transform>
+        <models>
+            <model file="box.3d" />
+        </models>
+    </group>
+    <!-- Sun -->
+    <group>
+        <transform>
+            <color r="255" g="239" b="0" />
+            <translate x="0" y="0" z="0" />
+            <scale x="20" y="20" z="20" />
+        </transform>
+        <models>
+            <model file="sphere.3d" />
+        </models>
+    </group>
+</world>

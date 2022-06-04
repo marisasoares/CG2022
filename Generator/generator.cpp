@@ -46,32 +46,56 @@ void drawBox(float x, float y, float z, int slices)
             file << auxX << " ";
             file << 0 << " ";
             file << auxZ << " ";
+            // normal
+            file << "0";
+            file << " -1";
+            file << " 0";
             file << "\n";
 
             file << auxX + slicesX << " ";
             file << 0 << " ";
             file << auxZ << " ";
+            // normal
+            file << "0";
+            file << " -1";
+            file << " 0";
             file << "\n";
 
             file << auxX + slicesX << " ";
             file << 0 << " ";
             file << auxZ + slicesZ << " ";
+            // normal
+            file << "0";
+            file << " -1";
+            file << " 0";
             file << "\n";
 
             // 2ºtriangulo
             file << auxX + slicesX << " ";
             file << 0 << " ";
             file << auxZ + slicesZ << " ";
+            // normal
+            file << "0";
+            file << " -1";
+            file << " 0";
             file << "\n";
 
             file << auxX << " ";
             file << 0 << " ";
             file << auxZ + slicesZ << " ";
+            // normal
+            file << "0";
+            file << " -1";
+            file << " 0";
             file << "\n";
 
             file << auxX << " ";
             file << 0 << " ";
             file << auxZ << " ";
+            // normal
+            file << "0";
+            file << " -1";
+            file << " 0";
             file << "\n";
 
             auxZ += slicesZ;
@@ -91,31 +115,55 @@ void drawBox(float x, float y, float z, int slices)
             file << auxX + slicesX << " ";
             file << auxY << " ";
             file << auxZ + slicesZ << " ";
+            // normal
+            file << "0";
+            file << " 1";
+            file << " 0";
             file << "\n";
 
             file << auxX + slicesX << " ";
             file << auxY << " ";
             file << auxZ << " ";
+            // normal
+            file << "0";
+            file << " 1";
+            file << " 0";
             file << "\n";
 
             file << auxX << " ";
             file << auxY << " ";
             file << auxZ << " ";
+            // normal
+            file << "0";
+            file << " 1";
+            file << " 0";
             file << "\n";
 
             file << auxX << " ";
             file << auxY << " ";
             file << auxZ << " ";
+            // normal
+            file << "0";
+            file << " 1";
+            file << " 0";
             file << "\n";
 
             file << auxX << " ";
             file << auxY << " ";
             file << auxZ + slicesZ << " ";
+            // normal
+            file << "0";
+            file << " 1";
+            file << " 0";
             file << "\n";
 
             file << auxX + slicesX << " ";
             file << auxY << " ";
             file << auxZ + slicesZ << " ";
+            // normal
+            file << "0";
+            file << " 1";
+            file << " 0";
             file << "\n";
 
             auxZ += slicesZ;
@@ -136,31 +184,55 @@ void drawBox(float x, float y, float z, int slices)
             file << auxX << " ";
             file << auxY << " ";
             file << auxZ << " ";
+            // normal
+            file << "1";
+            file << " 0";
+            file << " 0";
             file << "\n";
 
             file << auxX << " ";
             file << auxY - slicesY << " ";
             file << auxZ << " ";
+            // normal
+            file << "1";
+            file << " 0";
+            file << " 0";
             file << "\n";
 
             file << auxX << " ";
             file << auxY - slicesY << " ";
             file << auxZ - slicesZ << " ";
+            // normal
+            file << "1";
+            file << " 0";
+            file << " 0";
             file << "\n";
 
             file << auxX << " ";
             file << auxY - slicesY << " ";
             file << auxZ - slicesZ << " ";
+            // normal
+            file << "1";
+            file << " 0";
+            file << " 0";
             file << "\n";
 
             file << auxX << " ";
             file << auxY << " ";
             file << auxZ - slicesZ << " ";
+            // normal
+            file << "1";
+            file << " 0";
+            file << " 0";
             file << "\n";
 
             file << auxX << " ";
             file << auxY << " ";
             file << auxZ << " ";
+            // normal
+            file << "1";
+            file << " 0";
+            file << " 0";
             file << "\n";
 
             auxZ -= slicesZ;
@@ -181,31 +253,55 @@ void drawBox(float x, float y, float z, int slices)
             file << auxX << " ";
             file << auxY << " ";
             file << auxZ << " ";
+            // normal
+            file << "-1";
+            file << " 0";
+            file << " 0";
             file << "\n";
 
             file << auxX << " ";
             file << auxY - slicesY << " ";
             file << auxZ << " ";
+            // normal
+            file << "-1";
+            file << " 0";
+            file << " 0";
             file << "\n";
 
             file << auxX << " ";
             file << auxY - slicesY << " ";
             file << auxZ + slicesZ;
+            // normal
+            file << "-1";
+            file << " 0";
+            file << " 0";
             file << "\n";
 
             file << auxX << " ";
             file << auxY - slicesY << " ";
             file << auxZ + slicesZ << " ";
+            // normal
+            file << "-1";
+            file << " 0";
+            file << " 0";
             file << "\n";
 
             file << auxX << " ";
             file << auxY << " ";
             file << auxZ + slicesZ << " ";
+            // normal
+            file << "-1";
+            file << " 0";
+            file << " 0";
             file << "\n";
 
             file << auxX << " ";
             file << auxY << " ";
             file << auxZ << " ";
+            // normal
+            file << "-1";
+            file << " 0";
+            file << " 0";
             file << "\n";
 
             auxZ += slicesZ;
@@ -226,31 +322,55 @@ void drawBox(float x, float y, float z, int slices)
             file << auxX << " ";
             file << auxY << " ";
             file << auxZ << " ";
+            // normal
+            file << "0";
+            file << " 0";
+            file << " 1";
             file << "\n";
 
             file << auxX << " ";
             file << auxY - slicesY << " ";
             file << auxZ << " ";
+            // normal
+            file << "0";
+            file << " 0";
+            file << " 1";
             file << "\n";
 
             file << auxX + slicesX << " ";
             file << auxY - slicesY << " ";
             file << auxZ << " ";
+            // normal
+            file << "0";
+            file << " 0";
+            file << " 1";
             file << "\n";
 
             file << auxX + slicesX << " ";
             file << auxY - slicesY << " ";
             file << auxZ << " ";
+            // normal
+            file << "0";
+            file << " 0";
+            file << " 1";
             file << "\n";
 
             file << auxX + slicesX << " ";
             file << auxY << " ";
             file << auxZ << " ";
+            // normal
+            file << "0";
+            file << " 0";
+            file << " 1";
             file << "\n";
 
             file << auxX << " ";
             file << auxY << " ";
             file << auxZ << " ";
+            // normal
+            file << "0";
+            file << " 0";
+            file << " 1";
             file << "\n";
 
             auxX += slicesX;
@@ -271,31 +391,55 @@ void drawBox(float x, float y, float z, int slices)
             file << auxX << " ";
             file << auxY << " ";
             file << auxZ << " ";
+            // normal
+            file << "0";
+            file << " 0";
+            file << " -1";
             file << "\n";
 
             file << auxX << " ";
             file << auxY - slicesY << " ";
             file << auxZ << " ";
+            // normal
+            file << "0";
+            file << " 0";
+            file << " -1";
             file << "\n";
 
             file << auxX - slicesX << " ";
             file << auxY - slicesY << " ";
             file << auxZ << " ";
+            // normal
+            file << "0";
+            file << " 0";
+            file << " -1";
             file << "\n";
 
             file << auxX - slicesX << " ";
             file << auxY - slicesY << " ";
             file << auxZ << " ";
+            // normal
+            file << "0";
+            file << " 0";
+            file << " -1";
             file << "\n";
 
             file << auxX - slicesX << " ";
             file << auxY << " ";
             file << auxZ << " ";
+            // normal
+            file << "0";
+            file << " 0";
+            file << " -1";
             file << "\n";
 
             file << auxX << " ";
             file << auxY << " ";
             file << auxZ << " ";
+            // normal
+            file << "0";
+            file << " 0";
+            file << " -1";
             file << "\n";
 
             auxX -= slicesX;
@@ -330,33 +474,58 @@ void drawPlane(float length, int divisions)
             file << x;
             file << " 0 ";
             file << z;
+            // normal
+            file << " 0";
+            file << " 1";
+            file << " 0";
             file << "\n";
 
             file << x + div;
             file << " 0 ";
             file << z + div;
+            // normal
+            file << " 0";
+            file << " 1";
+            file << " 0";
             file << "\n";
 
             file << x + div;
             file << " 0 ";
             file << z;
+            // normal
+            file << " 0";
+            file << " 1";
+            file << " 0";
             file << "\n";
+
 
             // 2 triangulo
 
             file << x + div;
             file << " 0 ";
             file << z + div;
+            // normal
+            file << " 0";
+            file << " 1";
+            file << " 0";
             file << "\n";
 
             file << x;
             file << " 0 ";
             file << z;
+            // normal
+            file << " 0";
+            file << " 1";
+            file << " 0";
             file << "\n";
 
             file << x;
             file << " 0 ";
             file << z + div;
+            // normal
+            file << " 0";
+            file << " 1";
+            file << " 0";
             file << "\n";
 
             z += div;
@@ -631,48 +800,37 @@ void createBezierPatch(const char* patch, int tesselation, const char* savefilen
 
 
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     if (argc == 1)
         showSintaxError();
 
-    if (strcmp(argv[1], "plane") == 0)
-    {
+    if (strcmp(argv[1], "plane") == 0) {
         filename = argv[4];
         if (argc != 5)
             showSintaxError();
         drawPlane(atof(argv[2]), atof(argv[3]));
-    }
-    else if (strcmp(argv[1], "sphere") == 0)
-    {
+    } else if (strcmp(argv[1], "sphere") == 0) {
         if (argc != 6)
             showSintaxError();
         filename = argv[5];
         createSphere(atof(argv[2]), atof(argv[3]), atof(argv[4]));
-    }
-    else if ((strcmp(argv[1], "cone") == 0))
-    {
+    } else if ((strcmp(argv[1], "cone") == 0)) {
         if (argc != 7)
             showSintaxError();
         filename = argv[6];
         createCone(atof(argv[2]), atof(argv[3]), atoi(argv[4]), atoi(argv[5]));
-    }
-    else if (strcmp(argv[1], "box") == 0)
-    {
+    } else if (strcmp(argv[1], "box") == 0) {
         if (argc != 5)
             showSintaxError();
         filename = argv[4];
         drawBox(atof(argv[2]), atof(argv[2]), atof(argv[2]), atoi(argv[3]));
-    }
-    else if (strcmp(argv[1], "bezier") == 0)
-    {
+    } else if (strcmp(argv[1], "bezier") == 0) {
         if (argc != 5)
             showSintaxError();
         char *file = argv[2];
         filename = argv[4];
-        createBezierPatch(file,atoi(argv[3]),filename.c_str());
-    }
-    else
+        createBezierPatch(file, atoi(argv[3]), filename.c_str());
+    } else
         showSintaxError();
     return 1;
 }

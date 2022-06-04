@@ -55,9 +55,6 @@ public:
      * 3 - Color
      * */
     int type;
-    float color_r = 1;
-    float color_g = 1;
-    float color_b = 1;
     float x;
     float y;
     float z;
@@ -78,7 +75,23 @@ public:
     std::string filename = "NaN";
     std::list<Point> points;
     std::list<Transformation> transformations{};
+    std::string texture = "NaN";
+    float difuse_color[3] = {200,200,200};
+    float ambient_color[3] = {50,50,50};
+    float specular_color[3] = {0,0,0};
+    float emissive_color[3] = {0,0,0};
+    float shininess = 0;
     void drawModel() const;
+    void printOut();
+};
+
+class Light {
+public:
+    std::string type;
+    int posicao[3] = {0,10,0};
+    int direcao[3] = {1,1,1};
+    int cutoff = 45;
+    void drawLight();
     void printOut();
 };
 

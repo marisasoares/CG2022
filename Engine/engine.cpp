@@ -49,6 +49,8 @@ string xmlFile;
 //Modelos lidos do ficheiro XML
 list<Model> modelsToDraw;
 
+list<Light> lightsToDraw;
+
 //Configuração da camera atual
 CameraConfig cameraConfig;
 
@@ -106,17 +108,45 @@ void Model::drawModel() const {
 /* Print Model to stdout */
 void Model::printOut() {
     // Print file
-    cout << "==================================================\n";
+    cout << "==Model===========================================\n";
     cout << "Model Filename: " + this->filename + "\n";
-    cout << "Transformations List:\n";
+    cout << "Texture File: " + this->texture + "\n";
+    cout << "COLOR INFO -------------------------\n";
+    cout << "Emissive R: " + to_string(this->emissive_color[0]) + " G: " + to_string(this->emissive_color[1]) + " B: " + to_string(this->emissive_color[2]) + "\n";
+    cout << "Specular R: " + to_string(this->specular_color[0]) + " G: " + to_string(this->specular_color[1]) + " B: " + to_string(this->specular_color[2]) + "\n";
+    cout << "Ambient R: " + to_string(this->ambient_color[0]) + " G: " + to_string(this->ambient_color[1]) + " B: " + to_string(this->ambient_color[2]) + "\n";
+    cout << "Diffuse R: " + to_string(this->difuse_color[0]) + " G: " + to_string(this->difuse_color[1]) + " B: " + to_string(this->difuse_color[2]) + "\n";
+    cout << "Shininess: " + to_string(this->shininess) + "\n";
+    cout << "Transformations List ----------------\n";
     // Print Transformation list
     for( Transformation transformation : this->transformations){
         cout << transformation.toString();
     }
 }
 
+void Light::printOut() {
+    // Print file
+    cout << "Type : " + this->type + "\n";
+    if(strcmp(this->type.c_str(),"point") == 0){
+        cout << "Position: " + to_string(this->posicao[0]) + " " + to_string(this->posicao[1]) + " " + to_string(this->posicao[2]) + "\n";
+    } else if(strcmp(this->type.c_str(),"directional") == 0){
+        cout << "Direction: " + to_string(this->direcao[0]) + " " + to_string(this->direcao[1]) + " " + to_string(this->direcao[2]) + "\n";
+    } else if(strcmp(this->type.c_str(),"spotlight") == 0){
+        cout << "Position: " + to_string(this->posicao[0]) + " " + to_string(this->posicao[1]) + " " + to_string(this->posicao[2]) + "\n";
+        cout << "Direction: " + to_string(this->direcao[0]) + " " + to_string(this->direcao[1]) + " " + to_string(this->direcao[2]) + "\n";
+        cout << "Cutoff: " + to_string(this->cutoff) + "\n";
+    } else{
+        cout << "Unknown light type\n";
+        cout << "Position: " + to_string(this->posicao[0]) + " " + to_string(this->posicao[1]) + " " + to_string(this->posicao[2]) + "\n";
+        cout << "Direction: " + to_string(this->direcao[0]) + " " + to_string(this->direcao[1]) + " " + to_string(this->direcao[2]) + "\n";
+        cout << "Cutoff: " + to_string(this->cutoff) + "\n";
+    }
+    cout << "------------------\n";
+
+}
+
 void CameraConfig::printOut() {
-    cout << "==================================================\n";
+    cout << "==Camera==========================================\n";
     cout << "Camera Configurations:\n";
     cout << "Position x: " << this->cameraX;
     cout << " y: " << this->cameraY;
@@ -188,9 +218,6 @@ void Transformation::applyTransformation() {
         case(2):
             glScalef(this->x,this->y,this->z);
             break;
-        case(3):
-            glColor3f(this->color_r/255,this->color_g/255,this->color_b/255);
-            break;
         default:
             cout << "Unknown transformation type\n";
             break;
@@ -218,9 +245,6 @@ std::string Transformation::toString(){
             break;
         case(2):
             output_string = "Scale x: " + to_string(this->x) + " y: " + to_string(this->y) + " z: " + to_string(this->z) + "\n";
-            break;
-        case(3):
-            output_string = "Color x: " + to_string(this->color_r) + " y: " + to_string(this->color_g) + " z: " + to_string(this->color_b) + "\n";
             break;
         default:
             output_string ="Unknown transformation type\n";
@@ -286,14 +310,6 @@ list<Transformation> readTransformation(TiXmlElement* element){
         for (TiXmlElement *element2 = element->FirstChildElement("transform")->FirstChildElement();
              element2 != nullptr; element2 = element2->NextSiblingElement()) {
             Transformation transformation{};
-            if (strcmp(element2->Value(), "color") == 0) {
-                transformation.type = 3;
-                transformation.angle = 0;
-                transformation.color_r = atof(element2->Attribute("r"));
-                transformation.color_g = atof(element2->Attribute("g"));
-                transformation.color_b = atof(element2->Attribute("b"));
-                transformationList.push_back(transformation);
-            }
             if (strcmp(element2->Value(), "translate") == 0) {
                 transformation.type = 0;
                 transformation.angle = 0;
@@ -343,20 +359,102 @@ list<Transformation> readTransformation(TiXmlElement* element){
     return transformationList;
 }
 
+/* Read color group from XML file */
+void readColorGroup(TiXmlElement* element,Model model){
+    if(element ->FirstChildElement("color") != NULL){
+        for (TiXmlElement *element2 = element->FirstChildElement("color")->FirstChildElement();
+             element2 != nullptr; element2 = element2->NextSiblingElement()) {
+            if (strcmp(element2->Value(), "diffuse") == 0) {
+                model.difuse_color[0] =  atof(element2->Attribute("R"));
+                model.difuse_color[1] =  atof(element2->Attribute("G"));
+                model.difuse_color[2] =  atof(element2->Attribute("B"));
+            }
+            if (strcmp(element2->Value(), "ambient") == 0) {
+                model.ambient_color[0] =  atof(element2->Attribute("R"));
+                model.ambient_color[1] =  atof(element2->Attribute("G"));
+                model.ambient_color[2] =  atof(element2->Attribute("B"));
+            }
+            if (strcmp(element2->Value(), "specular") == 0) {
+                model.specular_color[0] =  atof(element2->Attribute("R"));
+                model.specular_color[1] =  atof(element2->Attribute("G"));
+                model.specular_color[2] =  atof(element2->Attribute("B"));
+            }
+            if (strcmp(element2->Value(), "emissive") == 0) {
+                model.emissive_color[0] =  atof(element2->Attribute("R"));
+                model.emissive_color[1] =  atof(element2->Attribute("G"));
+                model.emissive_color[2] =  atof(element2->Attribute("B"));
+            }
+            if (strcmp(element2->Value(), "shininess") == 0){
+                model.shininess = atof(element2->Attribute("value"));
+            }
+        }
+    }
+}
+
 /* Read model file from group */
 Model readModel(TiXmlElement* element){
     Model model;
     if(element ->FirstChildElement("models") != NULL){
-        for(TiXmlElement* element2 = element -> FirstChildElement("models")->FirstChildElement(); element2 != nullptr ; element2 = element2->NextSiblingElement()){
+        for(TiXmlElement* element2 = element -> FirstChildElement("models")->FirstChildElement(); element2 != nullptr ; element2 = element2->NextSiblingElement()) {
             const char *modelFile = element2->Attribute("file");
             model = openFileAndLoadModel(modelFile);
+            if (element2->FirstChildElement("texture") != NULL) {
+                string texture = element2->FirstChildElement("texture")->Attribute("file");
+                model.texture = texture;
+            }
+            readColorGroup(element2, model);
         }
     }
     return model;
 }
 
+
+
+/* Read light group from XML file */
+list<Light> readLightGroup(TiXmlElement* element){
+    list<Light> lights{};
+    if(element ->FirstChildElement("lights") != NULL){
+        for (TiXmlElement *element2 = element->FirstChildElement("lights")->FirstChildElement();
+             element2 != nullptr; element2 = element2->NextSiblingElement()) {
+            if (strcmp(element2->Value(), "light") == 0) {
+                Light light = {};
+                if(strcmp(element2->Attribute("type"),"point") == 0){
+                    light.type = "point";
+                    light.posicao[0] = atof(element2->Attribute("posX"));
+                    light.posicao[1] = atof(element2->Attribute("posY"));
+                    light.posicao[2] = atof(element2->Attribute("posZ"));
+
+                }
+                if(strcmp(element2->Attribute("type"),"directional") == 0){
+                    light.type = "directional";
+                    light.direcao[0] = atof(element2->Attribute("dirX"));
+                    light.direcao[1] = atof(element2->Attribute("dirY"));
+                    light.direcao[2] = atof(element2->Attribute("dirZ"));
+                }
+                if(strcmp(element2->Attribute("type"),"spotlight") == 0){
+                    light.type = "spotlight";
+                    light.posicao[0] = atof(element2->Attribute("posX"));
+                    light.posicao[1] = atof(element2->Attribute("posY"));
+                    light.posicao[2] = atof(element2->Attribute("posZ"));
+                    light.direcao[0] = atof(element2->Attribute("dirX"));
+                    light.direcao[1] = atof(element2->Attribute("dirY"));
+                    light.direcao[2] = atof(element2->Attribute("dirZ"));
+                    light.cutoff = atof(element2->Attribute("cutoff"));
+                }
+                lights.push_front(light);
+            }
+        }
+    }
+    return lights;
+}
+
 /* Read a group from the XML file*/
 void readGroupXMLConfigurationFile(TiXmlElement* element,list<Transformation> transformations){
+    string texture = "";
+    /* If it exists read texture file */
+    if(element ->FirstChildElement("texture") != NULL) {
+        texture = element ->FirstChildElement("texture")->Attribute("file");
+    }
     list<Transformation> transformationList = readTransformation(element);
     for(Transformation transformation: transformationList){
              transformations.push_back(transformation);
@@ -376,6 +474,7 @@ bool readXMLConfigurationFile(char* filename) {
     if(fileOpened){
         TiXmlElement* root = document.RootElement();
         readCameraXMLConfigurations(root);
+        lightsToDraw = readLightGroup(root);
         for(TiXmlElement* element2 = root -> FirstChildElement("group"); element2 != nullptr ; element2 = element2->NextSiblingElement()){
             readGroupXMLConfigurationFile(element2,{});
         }
@@ -549,6 +648,11 @@ int main(int argc, char **argv) {
     if(!fileExists) exit(-1);
     /* Print Camera information read */
     cameraConfig.printOut();
+    /* Print Lights to use */
+    cout << "==Lights==========================================\n";
+    for(Light light:  lightsToDraw) {
+        light.printOut();
+    }
     /* Print Models read */
     for(Model model:  modelsToDraw) {
         model.printOut();
