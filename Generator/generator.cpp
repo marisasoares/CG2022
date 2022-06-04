@@ -541,6 +541,9 @@ void createSphere(float raio, int stacks, int slices)
     float delta1 = 2 * M_PI / stacks;
     float delta2 = M_PI / slices;
 
+    float theta1 = -M_PI / 2;
+    float theta2 = 0.0f;
+
     fstream file;
     file.open(filename, ios::out);
     float x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4;
@@ -578,9 +581,25 @@ void createSphere(float raio, int stacks, int slices)
             file << x2 << " " << y2 << " " << z2 << endl;
             file << x4 << " " << y4 << " " << z4 << endl;
 
+            float e=cos(theta1 + delta1) * sin(theta2);
+            float b=sin(theta1 + delta1);
+            float c=cos(theta1 + delta1) * cos(theta2);
+            float d=cos(theta1) * sin(theta2);
+            float e1=cos(theta1) * cos(theta2);
+            float b1=cos(theta1) * sin(theta2 + delta2);
+            float c1=cos(theta1) * cos(theta2 + delta2);
+            float d1= cos(theta1 + delta1) * sin(theta2 + delta2);
+            float e2 = sin(theta1 + delta1);
+            float b2 = cos(theta1 + delta1) * cos(theta2 + delta2);
+
+            file << e << " " <<b <<  " " << c<< "\n";
+            file << d << " " << sin(theta1) <<  " " <<e1 << "\n";
+            file << b1 << " " << sin(theta1) <<  " " <<c1 << "\n";
+            file << d1 <<  " " << e2 <<  " " << b2 << "\n";
             a += delta1;
         }
 
+	theta1 += delta1;
         aux += delta2;
     }
 }
@@ -614,7 +633,8 @@ void createCone(float radius, float height, int slices, int stacks)
     float alt2 = altura;
     theta = 0;
     nextTheta = 0;
-
+    float y = cos(atan(altura / raio));
+    
     for (i = 0; i < slices; i++)
     {
         nextTheta += delta;
@@ -628,6 +648,11 @@ void createCone(float radius, float height, int slices, int stacks)
             file << r2 * sin(nextTheta) << " " << alt2 << " " << r2 * cos(nextTheta) << "\n";
             file << r2 * sin(theta) << " " << alt2 << " " << r2 * cos(theta) << "\n";
             file << r1 * sin(theta) << " " << alt1 << " " << r1 * cos(theta) << "\n";
+
+            file << sin(nextTheta) << " " << y << " " << cos(nextTheta) << "\n";
+            file << sin(nextTheta) << " " << y << " " << cos(nextTheta) << "\n";
+            file << sin(theta) << " " << y << " " << cos(theta) << "\n";
+            file << sin(theta) << " " << y << " " << cos(theta) << "\n";
 
             r1 -= raio;
             r2 -= raio;
