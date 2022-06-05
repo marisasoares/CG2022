@@ -282,7 +282,6 @@ void createSphere(float raio, int stacks, int slices)
 }
 
 
-
 void createCone(float radius, float height, int slices, int stacks)
 {
     fstream file;
@@ -299,11 +298,12 @@ void createCone(float radius, float height, int slices, int stacks)
     for (i = 0; i < slices; i++)
     {
         nextTheta = theta + delta;
-        //ponto e normal
-        file << "0 0 0 ";file << "0 -1 0\n";
-        file << radius * sin(nextTheta) << " 0 " << radius * cos(nextTheta) << " 0 -1 0\n";
-        file << radius * sin(theta) << " 0 " << radius * cos(theta) << " 0 -1 0\n";
-        
+
+        file << "0 0 0 0 -1 0\n";
+        file << radius * sin(nextTheta) << " 0 " << radius * cos(nextTheta) << "0 -1 0\n";
+        file << radius * sin(theta) << " 0 " << radius * cos(theta) << "0 -1 0\n";
+
+
         theta = nextTheta;
     } // Fazer as laterais
     float r1 = radius;
@@ -312,41 +312,39 @@ void createCone(float radius, float height, int slices, int stacks)
     float alt2 = altura;
     theta = 0;
     nextTheta = 0;
-    
+
     for (i = 0; i < slices; i++)
     {
         nextTheta += delta;
 
         for (j = 0; j < stacks; j++)
         {
-            file <<r1 * sin(nextTheta) << " " << alt1 << " " << r1 * cos(nextTheta) << " ";
-            // normal do ponto
+            file << r1 * sin(nextTheta) << " " << alt1 << " " << r1 * cos(nextTheta) << " ";
+
+            //Normal
             double dis = sqrt(pow(r1*sin(nextTheta),2)+pow(alt1-height,2)+pow(alt1, 2));
             double D = dis / cos(atan(radius/height));
-        
             double N = sqrt(pow(r1*sin(nextTheta),2)+pow(alt1-(height-D),2)+pow(r1 * cos(nextTheta),2));
             if (N == 0)
                 file <<r1 * sin(nextTheta) << " " << alt1-(height-D) << " " << r1 * cos(nextTheta) << "\n";
             else file <<(r1 * sin(nextTheta))/N << " " << (alt1-(height-D))/N << " " << (r1 * cos(nextTheta))/N << "\n";
 
-
-
             file << r2 * sin(nextTheta) << " " << alt2 << " " << r2 * cos(nextTheta) << " ";
             // normal do ponto
             dis= sqrt(pow(r2*sin(nextTheta),2)+pow(alt2-height,2)+pow(alt2, 2));
             D = dis / cos(atan(radius/height));
-        
+
             N = sqrt(pow(r1*sin(nextTheta),2)+pow(alt2-(height-D),2)+pow(r2 * cos(nextTheta),2));
             if (N == 0)
                 file << r2 * sin(nextTheta) << " " << alt2-(height-D) << " " << r2 * cos(nextTheta) << "\n";
             else file <<(r2 * sin(nextTheta))/N << " " << (alt2-(height-D))/N << " " << (r2 * cos(nextTheta))/N << "\n";
 
-
             file << r1 * sin(theta) << " " << alt1 << " " << r1 * cos(theta) << " ";
+
             // normal do ponto
             dis = sqrt(pow(r1*sin(theta),2)+pow(alt1-height,2)+pow(alt1, 2));
             D = dis / cos(atan(radius/height));
-        
+
             N = sqrt(pow(r1*sin(theta),2)+pow(alt1-(height-D),2)+pow(r1 * cos(theta),2));
             if (N == 0)
                 file <<r1 * sin(theta) << " " << alt1-(height-D) << " " << r1 * cos(theta) << "\n";
@@ -354,41 +352,36 @@ void createCone(float radius, float height, int slices, int stacks)
 
 
 
-            file <<r2 * sin(nextTheta) << " " << alt2 << " " << r2 * cos(nextTheta) << " ";
-            // normal do ponto
-            dis = sqrt(pow(r2*sin(nextTheta),2)+pow(alt2-height,2)+pow(alt2, 2));
-            D = dis / cos(atan(radius/height));
-        
+
+            file << r2 * sin(nextTheta) << " " << alt2 << " " << r2 * cos(nextTheta) << " ";
+
             N = sqrt(pow(r2*sin(nextTheta),2)+pow(alt2-(height-D),2)+pow(r2 * cos(nextTheta),2));
             if (N == 0)
                 file <<r2 * sin(nextTheta) << " " << alt2-(height-D) << " " << r2 * cos(nextTheta) << "\n";
             else file <<(r2 * sin(nextTheta))/N << " " << (alt2-(height-D))/N << " " << (r2 * cos(nextTheta))/N << "\n";
-           
-           
-           
-            file << r2 * sin(theta) << " " << alt2 << " " << r2 * cos(theta) << "\n";
+
+            file << r2 * sin(theta) << " " << alt2 << " " << r2 * cos(theta) << " ";
+
             // normal do ponto
             dis = sqrt(pow(r2*sin(theta),2)+pow(alt2-height,2)+pow(alt2, 2));
             D = dis / cos(atan(radius/height));
-        
+
             N = sqrt(pow(r2*sin(theta),2)+pow(alt2-(height-D),2)+pow(r2 * cos(theta),2));
             if (N == 0)
                 file <<r2 * sin(theta) << " " << alt2-(height-D) << " " << r2 * cos(theta) << "\n";
             else file <<(r2 * sin(theta))/N << " " << (alt2-(height-D))/N << " " << (r2 * cos(theta))/N << "\n";
-            
-            
-            
-            file << r1 * sin(theta) << " " << alt1 << " " << r1 * cos(theta) << "\n";
+
+            file << r1 * sin(theta) << " " << alt1 << " " << r1 * cos(theta) << " ";
+
             // normal do ponto
             dis = sqrt(pow(r1*sin(theta),2)+pow(alt1-height,2)+pow(alt1, 2));
             D = dis / cos(atan(radius/height));
-        
+
             N = sqrt(pow(r1*sin(theta),2)+pow(alt1-(height-D),2)+pow(r1 * cos(theta),2));
             if (N == 0)
                 file <<r1 * sin(theta) << " " << alt1-(height-D) << " " << r1 * cos(theta) << "\n";
             else file <<(r1 * sin(theta))/N << " " << (alt1-(height-D))/N << " " << (r1 * cos(theta))/N << "\n";
 
-    
             r1 -= raio;
             r2 -= raio;
             alt1 += altura;
@@ -401,6 +394,7 @@ void createCone(float radius, float height, int slices, int stacks)
         theta = nextTheta;
     }
 }
+
 
 void showSintaxError()
 {
