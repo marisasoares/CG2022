@@ -431,10 +431,11 @@ void readColorGroup(TiXmlElement* element,Model* model){
 }
 
 /* Read model file from group */
-Model readModel(TiXmlElement* element){
-    Model model{};
+list<Model> readModel(TiXmlElement* element){
+    list<Model> modelList{};
     if(element ->FirstChildElement("models") != NULL){
-        for(TiXmlElement* element2 = element -> FirstChildElement("models")->FirstChildElement(); element2 != nullptr ; element2 = element2->NextSiblingElement()) {
+        for(TiXmlElement* element2 = element -> FirstChildElement("models")->FirstChildElement("model"); element2 != nullptr ; element2 = element2->NextSiblingElement()) {
+            Model model{};
             const char *modelFile = element2->Attribute("file");
             model = openFileAndLoadModel(modelFile);
             if (element2->FirstChildElement("texture") != NULL) {
@@ -442,9 +443,10 @@ Model readModel(TiXmlElement* element){
                 model.texture = texture;
             }
             readColorGroup(element -> FirstChildElement("models")->FirstChildElement(), &model);
+            modelList.push_back(model);
         }
     }
-    return model;
+    return modelList;
 }
 
 
@@ -459,26 +461,43 @@ list<Light> readLightGroup(TiXmlElement* element){
                 Light light = {};
                 if(strcmp(element2->Attribute("type"),"point") == 0){
                     light.type = "point";
-                    light.posicao[0] = atof(element2->Attribute("posX"));
-                    light.posicao[1] = atof(element2->Attribute("posY"));
-                    light.posicao[2] = atof(element2->Attribute("posZ"));
+                    if(element2->Attribute("posX") != nullptr) light.posicao[0] = atof(element2->Attribute("posX"));
+                    if(element2->Attribute("posY") != nullptr) light.posicao[1] = atof(element2->Attribute("posY"));
+                    if(element2->Attribute("posZ") != nullptr) light.posicao[2] = atof(element2->Attribute("posZ"));
+
+                    if(element2->Attribute("posx") != nullptr) light.posicao[0] = atof(element2->Attribute("posx"));
+                    if(element2->Attribute("posy") != nullptr) light.posicao[1] = atof(element2->Attribute("posy"));
+                    if(element2->Attribute("posz") != nullptr) light.posicao[2] = atof(element2->Attribute("posz"));
 
                 }
                 if(strcmp(element2->Attribute("type"),"directional") == 0){
                     light.type = "directional";
-                    light.direcao[0] = atof(element2->Attribute("dirX"));
-                    light.direcao[1] = atof(element2->Attribute("dirY"));
-                    light.direcao[2] = atof(element2->Attribute("dirZ"));
+                    if(element2->Attribute("dirX") != nullptr) light.direcao[0] = atof(element2->Attribute("dirX"));
+                    if(element2->Attribute("dirY") != nullptr) light.direcao[1] = atof(element2->Attribute("dirY"));
+                    if(element2->Attribute("dirZ") != nullptr) light.direcao[2] = atof(element2->Attribute("dirZ"));
+
+                    if(element2->Attribute("dirx") != nullptr) light.direcao[0] = atof(element2->Attribute("dirx"));
+                    if(element2->Attribute("diry") != nullptr) light.direcao[1] = atof(element2->Attribute("diry"));
+                    if(element2->Attribute("dirz") != nullptr) light.direcao[2] = atof(element2->Attribute("dirz"));
                 }
                 if(strcmp(element2->Attribute("type"),"spotlight") == 0){
                     light.type = "spotlight";
-                    light.posicao[0] = atof(element2->Attribute("posX"));
-                    light.posicao[1] = atof(element2->Attribute("posY"));
-                    light.posicao[2] = atof(element2->Attribute("posZ"));
-                    light.direcao[0] = atof(element2->Attribute("dirX"));
-                    light.direcao[1] = atof(element2->Attribute("dirY"));
-                    light.direcao[2] = atof(element2->Attribute("dirZ"));
-                    light.cutoff = atof(element2->Attribute("cutoff"));
+                    if(element2->Attribute("posX") != nullptr) light.posicao[0] = atof(element2->Attribute("posX"));
+                    if(element2->Attribute("posY") != nullptr) light.posicao[1] = atof(element2->Attribute("posY"));
+                    if(element2->Attribute("posZ") != nullptr) light.posicao[2] = atof(element2->Attribute("posZ"));
+
+                    if(element2->Attribute("posx") != nullptr) light.posicao[0] = atof(element2->Attribute("posx"));
+                    if(element2->Attribute("posy") != nullptr) light.posicao[1] = atof(element2->Attribute("posy"));
+                    if(element2->Attribute("posz") != nullptr) light.posicao[2] = atof(element2->Attribute("posz"));
+
+                    if(element2->Attribute("dirX") != nullptr) light.direcao[0] = atof(element2->Attribute("dirX"));
+                    if(element2->Attribute("dirY") != nullptr) light.direcao[1] = atof(element2->Attribute("dirY"));
+                    if(element2->Attribute("dirZ") != nullptr) light.direcao[2] = atof(element2->Attribute("dirZ"));
+
+                    if(element2->Attribute("dirx") != nullptr) light.direcao[0] = atof(element2->Attribute("dirx"));
+                    if(element2->Attribute("diry") != nullptr) light.direcao[1] = atof(element2->Attribute("diry"));
+                    if(element2->Attribute("dirz") != nullptr) light.direcao[2] = atof(element2->Attribute("dirz"));
+                    if(element2->Attribute("cutoff") != nullptr) light.cutoff = atof(element2->Attribute("cutoff"));
                 }
                 lights.push_front(light);
             }
@@ -498,11 +517,14 @@ void readGroupXMLConfigurationFile(TiXmlElement* element,list<Transformation> tr
     for(Transformation transformation: transformationList){
              transformations.push_back(transformation);
     }
-    Model model = readModel(element);
-    model.transformations = transformations;
-    for(TiXmlElement* subgroup = element -> FirstChildElement("group"); subgroup != nullptr ; subgroup = subgroup->NextSiblingElement())
+    list<Model> modelList = readModel(element);
+    for (Model m: modelList) {
+        m.transformations = transformations;
+        modelsToDraw.push_back(m);
+    }
+    for(TiXmlElement* subgroup = element -> FirstChildElement("group"); subgroup != nullptr ; subgroup = subgroup->NextSiblingElement()){
         readGroupXMLConfigurationFile(subgroup,transformationList);
-    modelsToDraw.push_back(model);
+    }
 }
 
 //Ler o ficheiro XML e carregar os modelos

@@ -1,4 +1,4 @@
-<world> <>
+<world>
     <camera> 
 	    <position x="1.757135" y="1.799201" z="3.416921" />
 	    <lookAt x="0" y="0" z="0" />
@@ -7,7 +7,7 @@
     </camera>
 	
 	<lights> 
-		<light type="directional" dirx="1" diry="0.7" dirz="0.5"/>
+		<light type="directional" dirX="1" dirY="0.7" dirZ="0.5"/>
 	</lights>
 	<group> 
   		<models> 

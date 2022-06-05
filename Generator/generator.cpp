@@ -34,7 +34,7 @@ void drawBox(float x, float y, float z, int slices)
     fstream file;
     file.open(filename, ios::out);
 
-    string normal = "0 -1 0 \n";
+    string normal = "0 -1 0\n";
     // Base
     float auxX = -x1;
     float auxY = 0-(y/2);
@@ -180,14 +180,14 @@ void drawPlane(float length, int divisions){
     for (i = 0; i < divisions; i++){
         for (j = 0; j < divisions; j++){
             // 1º triangulo
-            file << x << " 0 " << z << normal;
-            file << x + div << " 0 " << z + div << normal;
-            file << x + div << " 0 " << z << normal;
+            file << x << " 0 " << z << " " << normal;
+            file << x + div << " 0 " << z + div << " " << normal;
+            file << x + div << " 0 " << z << " " << normal;
 
             // 2º triangulo
-            file << x + div << " 0 " << z + div << normal;
-            file << x << " 0 " << z << normal;
-            file << x << " 0 " << z + div << normal;
+            file << x + div << " 0 " << z + div << " " << normal;
+            file << x << " 0 " << z << " " << normal;
+            file << x << " 0 " << z + div << " " << normal;
             z += div;
         }
         z = -z1;
