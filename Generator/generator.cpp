@@ -573,29 +573,46 @@ void createSphere(float raio, int stacks, int slices)
             y4 = raio * cos(aux);
             z4 = raio * sin(aux) * cos(a + delta1);
 
-            file << x1 << " " << y1 << " " << z1 << endl;
-            file << x3 << " " << y3 << " " << z3 << endl;
-            file << x2 << " " << y2 << " " << z2 << endl;
+            file << x1 << " " << y1 << " " << z1 << " ";
+            double N = sqrt(pow(x1,2)+pow(y1,2)+pow(z1,2));
+            if (N == 0)
+                file << x1 << " " << y1 << " " << z1<<"\n";
+            else file << x1/N << " " << y1/N << " " << z1/N <<"\n";
 
-            file << x1 << " " << y1 << " " << z1 << endl;
-            file << x2 << " " << y2 << " " << z2 << endl;
-            file << x4 << " " << y4 << " " << z4 << endl;
+            file << x3 << " " << y3 << " " << z3 << " ";
+            N = sqrt(pow(x3,2)+pow(y3,2)+pow(z3,2));
+            if (N == 0)
+                file << x3 << " " << y3 << " " << z3<<"\n";
+            else file << x3/N << " " << y3/N << " " << z3/N <<"\n";
 
-            float e=cos(theta1 + delta1) * sin(theta2);
-            float b=sin(theta1 + delta1);
-            float c=cos(theta1 + delta1) * cos(theta2);
-            float d=cos(theta1) * sin(theta2);
-            float e1=cos(theta1) * cos(theta2);
-            float b1=cos(theta1) * sin(theta2 + delta2);
-            float c1=cos(theta1) * cos(theta2 + delta2);
-            float d1= cos(theta1 + delta1) * sin(theta2 + delta2);
-            float e2 = sin(theta1 + delta1);
-            float b2 = cos(theta1 + delta1) * cos(theta2 + delta2);
 
-            file << e << " " <<b <<  " " << c<< "\n";
-            file << d << " " << sin(theta1) <<  " " <<e1 << "\n";
-            file << b1 << " " << sin(theta1) <<  " " <<c1 << "\n";
-            file << d1 <<  " " << e2 <<  " " << b2 << "\n";
+            file << x2 << " " << y2 << " " << z2 << " ";
+            N = sqrt(pow(x2,2)+pow(y2,2)+pow(z2,2));
+            if (N == 0)
+                file << x2 << " " << y2 << " " << z2<<"\n";
+            else file << x2/N << " " << y2/N << " " << z2/N <<"\n";
+
+
+            file << x1 << " " << y1 << " " << z1 << " ";
+            N = sqrt(pow(x1,2)+pow(y1,2)+pow(z1,2));
+            if (N == 0)
+                file << x1 << " " << y1 << " " << z1<<"\n";
+            else file << x1/N << " " << y1/N << " " << z1/N <<"\n";
+
+
+            file << x2 << " " << y2 << " " << z2 << " ";
+            N = sqrt(pow(x2,2)+pow(y2,2)+pow(z2,2));
+            if (N == 0)
+                file << x2 << " " << y2 << " " << z2<<"\n";
+            else file << x2/N << " " << y2/N << " " << z2/N <<"\n";
+
+
+            file << x4 << " " << y4 << " " << z4 << " ";
+            N = sqrt(pow(x4,2)+pow(y4,2)+pow(z4,2));
+            if (N == 0)
+                file << x4 << " " << y4 << " " << z4<<"\n";
+            else file << x4/N << " " << y4/N << " " << z4/N <<"\n";
+
             a += delta1;
         }
 
@@ -603,6 +620,8 @@ void createSphere(float raio, int stacks, int slices)
         aux += delta2;
     }
 }
+
+
 
 void createCone(float radius, float height, int slices, int stacks)
 {
@@ -620,11 +639,11 @@ void createCone(float radius, float height, int slices, int stacks)
     for (i = 0; i < slices; i++)
     {
         nextTheta = theta + delta;
-
-        file << "0 0 0\n";
-        file << radius * sin(nextTheta) << " 0 " << radius * cos(nextTheta) << "\n";
-        file << radius * sin(theta) << " 0 " << radius * cos(theta) << "\n";
-
+        //ponto e normal
+        file << "0 0 0 ";file << "0 -1 0\n";
+        file << radius * sin(nextTheta) << " 0 " << radius * cos(nextTheta);file << " 0 -1 0\n";
+        file << radius * sin(theta) << " 0 " << radius * cos(theta);file << " 0 -1 0\n";
+        
         theta = nextTheta;
     } // Fazer as laterais
     float r1 = radius;
@@ -633,7 +652,6 @@ void createCone(float radius, float height, int slices, int stacks)
     float alt2 = altura;
     theta = 0;
     nextTheta = 0;
-    float y = cos(atan(altura / raio));
     
     for (i = 0; i < slices; i++)
     {
@@ -641,20 +659,76 @@ void createCone(float radius, float height, int slices, int stacks)
 
         for (j = 0; j < stacks; j++)
         {
-            file << r1 * sin(nextTheta) << " " << alt1 << " " << r1 * cos(nextTheta) << "\n";
-            file << r2 * sin(nextTheta) << " " << alt2 << " " << r2 * cos(nextTheta) << "\n";
-            file << r1 * sin(theta) << " " << alt1 << " " << r1 * cos(theta) << "\n";
+            file <<r1 * sin(nextTheta) << " " << alt1 << " " << r1 * cos(nextTheta) << " ";
+            // normal do ponto
+            double dis = sqrt(pow(r1*sin(nextTheta),2)+pow(alt1-height,2)+pow(alt1, 2));
+            double D = dis / cos(atan(radius/height));
+        
+            double N = sqrt(pow(r1*sin(nextTheta),2)+pow(alt1-(height-D),2)+pow(r1 * cos(nextTheta),2));
+            if (N == 0)
+                file <<r1 * sin(nextTheta) << " " << alt1-(height-D) << " " << r1 * cos(nextTheta) << "\n";
+            else file <<(r1 * sin(nextTheta))/N << " " << (alt1-(height-D))/N << " " << (r1 * cos(nextTheta))/N << "\n";
 
-            file << r2 * sin(nextTheta) << " " << alt2 << " " << r2 * cos(nextTheta) << "\n";
+
+
+            file << r2 * sin(nextTheta) << " " << alt2 << " " << r2 * cos(nextTheta) << " ";
+            // normal do ponto
+            dis= sqrt(pow(r2*sin(nextTheta),2)+pow(alt2-height,2)+pow(alt2, 2));
+            D = dis / cos(atan(radius/height));
+        
+            N = sqrt(pow(r1*sin(nextTheta),2)+pow(alt2-(height-D),2)+pow(r2 * cos(nextTheta),2));
+            if (N == 0)
+                file << r2 * sin(nextTheta) << " " << alt2-(height-D) << " " << r2 * cos(nextTheta) << "\n";
+            else file <<(r2 * sin(nextTheta))/N << " " << (alt2-(height-D))/N << " " << (r2 * cos(nextTheta))/N << "\n";
+
+
+            file << r1 * sin(theta) << " " << alt1 << " " << r1 * cos(theta) << " ";
+            // normal do ponto
+            dis = sqrt(pow(r1*sin(theta),2)+pow(alt1-height,2)+pow(alt1, 2));
+            D = dis / cos(atan(radius/height));
+        
+            N = sqrt(pow(r1*sin(theta),2)+pow(alt1-(height-D),2)+pow(r1 * cos(theta),2));
+            if (N == 0)
+                file <<r1 * sin(theta) << " " << alt1-(height-D) << " " << r1 * cos(theta) << "\n";
+            else file <<(r1 * sin(theta))/N << " " << (alt1-(height-D))/N << " " << (r1 * cos(theta))/N << "\n";
+
+
+
+            file <<r2 * sin(nextTheta) << " " << alt2 << " " << r2 * cos(nextTheta) << " ";
+            // normal do ponto
+            dis = sqrt(pow(r2*sin(nextTheta),2)+pow(alt2-height,2)+pow(alt2, 2));
+            D = dis / cos(atan(radius/height));
+        
+            N = sqrt(pow(r2*sin(nextTheta),2)+pow(alt2-(height-D),2)+pow(r2 * cos(nextTheta),2));
+            if (N == 0)
+                file <<r2 * sin(nextTheta) << " " << alt2-(height-D) << " " << r2 * cos(nextTheta) << "\n";
+            else file <<(r2 * sin(nextTheta))/N << " " << (alt2-(height-D))/N << " " << (r2 * cos(nextTheta))/N << "\n";
+           
+           
+           
             file << r2 * sin(theta) << " " << alt2 << " " << r2 * cos(theta) << "\n";
+            // normal do ponto
+            dis = sqrt(pow(r2*sin(theta),2)+pow(alt2-height,2)+pow(alt2, 2));
+            D = dis / cos(atan(radius/height));
+        
+            N = sqrt(pow(r2*sin(theta),2)+pow(alt2-(height-D),2)+pow(r2 * cos(theta),2));
+            if (N == 0)
+                file <<r2 * sin(theta) << " " << alt2-(height-D) << " " << r2 * cos(theta) << "\n";
+            else file <<(r2 * sin(theta))/N << " " << (alt2-(height-D))/N << " " << (r2 * cos(theta))/N << "\n";
+            
+            
+            
             file << r1 * sin(theta) << " " << alt1 << " " << r1 * cos(theta) << "\n";
+            // normal do ponto
+            dis = sqrt(pow(r1*sin(theta),2)+pow(alt1-height,2)+pow(alt1, 2));
+            D = dis / cos(atan(radius/height));
+        
+            N = sqrt(pow(r1*sin(theta),2)+pow(alt1-(height-D),2)+pow(r1 * cos(theta),2));
+            if (N == 0)
+                file <<r1 * sin(theta) << " " << alt1-(height-D) << " " << r1 * cos(theta) << "\n";
+            else file <<(r1 * sin(theta))/N << " " << (alt1-(height-D))/N << " " << (r1 * cos(theta))/N << "\n";
 
-            // Normais
-            file << sin(nextTheta) << " " << y << " " << cos(nextTheta) << "\n";
-            file << sin(nextTheta) << " " << y << " " << cos(nextTheta) << "\n";
-            file << sin(theta) << " " << y << " " << cos(theta) << "\n";
-            file << sin(theta) << " " << y << " " << cos(theta) << "\n";
-
+    
             r1 -= raio;
             r2 -= raio;
             alt1 += altura;
