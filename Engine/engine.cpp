@@ -65,7 +65,7 @@ void Model::drawModel() const {
         transformation.applyTransformation();
     }
     float vertex[points.size()*3];
-    float normalB[normals.size()*3];
+    float normalB[points.size()*3];
     int index = 0;
     for(Point point :points){
         vertex[index] = point.x;
@@ -143,10 +143,6 @@ void Model::printOut() {
     for( Transformation transformation : this->transformations){
         cout << transformation.toString();
     }
-    for (Point p: normals) {
-        cout << p.x << " " << p.y << " " << p.z << "\n";
-
-    }
 }
 
 void Light::printOut() {
@@ -191,6 +187,16 @@ void renderCatmullRomCurve(std::list<Point> PointList) {
     float pos[3];
     float deriv[3];
     float gt = 0;
+    float difuse_color[4] = {0,0,0,1};
+    float ambient_color[4] = {50,50,50,1};
+    float specular_color[4] = {0,0,0,1};
+    float emissive_color[4] = {0,0,0,1};
+    float shininess = 0;
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, difuse_color);
+    glMaterialfv(GL_FRONT,GL_AMBIENT,ambient_color);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, specular_color);
+    glMaterialfv(GL_FRONT,GL_EMISSION,emissive_color);
+    glMaterialf(GL_FRONT, GL_SHININESS, shininess);
     while (gt < 1) {
         getGlobalCatmullRomPoint(gt, pos, deriv,PointList);
         glBegin(GL_LINE_LOOP);
@@ -328,6 +334,7 @@ void readCameraXMLConfigurations(TiXmlElement* root){
         if (fov) cameraConfig.fov = atof(fov);
         if (near) cameraConfig.near = atof(near);
         if (far) cameraConfig.far = atof(far);
+
         i++;
     }
 }
@@ -589,15 +596,13 @@ void renderScene(void) {
     for (Light l: lightsToDraw) {
         if(index >= 8) break;
         if(l.type.compare("point") == 0){
-            float pos[4] = {l.posicao[0],l.posicao[1],l.posicao[2],0};
-            glLightfv(0x4000+index,GL_POSITION,pos);
-        }else if(l.type.compare("directional") == 0){
             float pos[4] = {l.posicao[0],l.posicao[1],l.posicao[2],1};
             glLightfv(0x4000+index,GL_POSITION,pos);
+        }else if(l.type.compare("directional") == 0){
             float direction[4] = {l.direcao[0],l.direcao[1],l.direcao[2]};
             glLightfv(0x4000+index,GL_SPOT_DIRECTION,direction);
         }else if(l.type.compare("spotlight") == 0){
-            float pos[4] = {l.posicao[0],l.posicao[1],l.posicao[2],0};
+            float pos[4] = {l.posicao[0],l.posicao[1],l.posicao[2],1};
             glLightfv(0x4000+index,GL_POSITION,pos);
             float direction[4] = {l.direcao[0],l.direcao[1],l.direcao[2]};
             glLightfv(0x4000+index,GL_SPOT_DIRECTION,direction);
@@ -713,6 +718,8 @@ int main(int argc, char **argv) {
     //Calculate distance to origin (LookAt point)
     //distance_Origin = sqrt((cameraConfig.cameraX)*(cameraConfig.cameraX) + (cameraConfig.cameraY)*(cameraConfig.cameraY) + (cameraConfig.cameraZ)*(cameraConfig.cameraZ));
     distance_Origin = sqrt(powf(cameraConfig.cameraX - cameraConfig.lookAtX,2) + powf(cameraConfig.cameraY - cameraConfig.lookAtY,2) + powf(cameraConfig.cameraZ - cameraConfig.lookAtZ,2) );
+    beta_angle = asin(cameraConfig.cameraY/distance_Origin);
+    alpha_angle = asin(cameraConfig.cameraX/(distance_Origin* cos(beta_angle)));
 // init GLUT and the window
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DEPTH|GLUT_DOUBLE|GLUT_RGBA);
@@ -738,10 +745,13 @@ int main(int argc, char **argv) {
 
     glEnable(GL_CULL_FACE);
     glEnable(GL_LIGHTING);
+    glEnable(GL_RESCALE_NORMAL);
 
     //Define lights
     GLfloat dark[4] = {0.2, 0.2, 0.2, 1.0};
     GLfloat white[4] = {1.0, 1.0, 1.0, 1.0};
+    float amb[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, amb);
     int index = 0;
     for (Light l : lightsToDraw) {
         if(index >= 8) break;

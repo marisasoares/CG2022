@@ -10,7 +10,6 @@
 #include <fstream>
 #include <stdlib.h>
 #include <vector>
-#include "sstream"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -35,68 +34,22 @@ void drawBox(float x, float y, float z, int slices)
     fstream file;
     file.open(filename, ios::out);
 
+    string normal = "0 -1 0 \n";
     // Base
     float auxX = -x1;
+    float auxY = 0-(y/2);
     float auxZ = -z1;
-    for (int i = 0; i < slices; i++)
-    {
-        for (int j = 0; j < slices; j++)
-        {
+    for (int i = 0; i < slices; i++){
+        for (int j = 0; j < slices; j++){
             // 1ºtriangulo
-            file << auxX << " ";
-            file << 0 << " ";
-            file << auxZ << " ";
-            // normal
-            file << "0";
-            file << " -1";
-            file << " 0";
-            file << "\n";
-
-            file << auxX + slicesX << " ";
-            file << 0 << " ";
-            file << auxZ << " ";
-            // normal
-            file << "0";
-            file << " -1";
-            file << " 0";
-            file << "\n";
-
-            file << auxX + slicesX << " ";
-            file << 0 << " ";
-            file << auxZ + slicesZ << " ";
-            // normal
-            file << "0";
-            file << " -1";
-            file << " 0";
-            file << "\n";
+            file << auxX << " " << auxY << " " << auxZ << " " << normal;
+            file << auxX + slicesX << " " << auxY << " " << auxZ << " " << normal;
+            file << auxX + slicesX << " " << auxY << " " << auxZ + slicesZ << " " << normal;
 
             // 2ºtriangulo
-            file << auxX + slicesX << " ";
-            file << 0 << " ";
-            file << auxZ + slicesZ << " ";
-            // normal
-            file << "0";
-            file << " -1";
-            file << " 0";
-            file << "\n";
-
-            file << auxX << " ";
-            file << 0 << " ";
-            file << auxZ + slicesZ << " ";
-            // normal
-            file << "0";
-            file << " -1";
-            file << " 0";
-            file << "\n";
-
-            file << auxX << " ";
-            file << 0 << " ";
-            file << auxZ << " ";
-            // normal
-            file << "0";
-            file << " -1";
-            file << " 0";
-            file << "\n";
+            file << auxX + slicesX << " " << auxY << " " << auxZ + slicesZ << " " << normal;
+            file << auxX << " " << auxY << " " << auxZ + slicesZ << " " << normal;
+            file << auxX << " " << auxY << " " << auxZ << " " << normal;
 
             auxZ += slicesZ;
         }
@@ -106,65 +59,18 @@ void drawBox(float x, float y, float z, int slices)
     // Cima
     auxX = -x1;
     auxZ = -z1;
-    float auxY = y;
-    for (int i = 0; i < slices; i++)
-    {
-        for (int j = 0; j < slices; j++)
-        {
+    auxY = y-(y/2);
+    normal = "0 1 0\n";
+    for (int i = 0; i < slices; i++){
+        for (int j = 0; j < slices; j++){
 
-            file << auxX + slicesX << " ";
-            file << auxY << " ";
-            file << auxZ + slicesZ << " ";
-            // normal
-            file << "0";
-            file << " 1";
-            file << " 0";
-            file << "\n";
+            file << auxX + slicesX << " " << auxY << " " << auxZ + slicesZ << " " << normal;
+            file << auxX + slicesX << " " << auxY << " " << auxZ << " " << normal;
+            file << auxX << " " << auxY << " " << auxZ << " " << normal;
 
-            file << auxX + slicesX << " ";
-            file << auxY << " ";
-            file << auxZ << " ";
-            // normal
-            file << "0";
-            file << " 1";
-            file << " 0";
-            file << "\n";
-
-            file << auxX << " ";
-            file << auxY << " ";
-            file << auxZ << " ";
-            // normal
-            file << "0";
-            file << " 1";
-            file << " 0";
-            file << "\n";
-
-            file << auxX << " ";
-            file << auxY << " ";
-            file << auxZ << " ";
-            // normal
-            file << "0";
-            file << " 1";
-            file << " 0";
-            file << "\n";
-
-            file << auxX << " ";
-            file << auxY << " ";
-            file << auxZ + slicesZ << " ";
-            // normal
-            file << "0";
-            file << " 1";
-            file << " 0";
-            file << "\n";
-
-            file << auxX + slicesX << " ";
-            file << auxY << " ";
-            file << auxZ + slicesZ << " ";
-            // normal
-            file << "0";
-            file << " 1";
-            file << " 0";
-            file << "\n";
+            file << auxX << " " << auxY << " " << auxZ << " " << normal;
+            file << auxX << " " << auxY << " " << auxZ + slicesZ << " " << normal;
+            file << auxX + slicesX << " " << auxY << " " << auxZ + slicesZ << " " << normal;
 
             auxZ += slicesZ;
         }
@@ -175,66 +81,18 @@ void drawBox(float x, float y, float z, int slices)
     // Lado direito
     auxX = x1;
     auxZ = z1;
-    auxY = y;
-    for (int i = 0; i < slices; i++)
-    {
-        for (int j = 0; j < slices; j++)
-        {
+    auxY = y -(y/2);
+    normal = "1 0 0\n";
+    for (int i = 0; i < slices; i++){
+        for (int j = 0; j < slices; j++){
 
-            file << auxX << " ";
-            file << auxY << " ";
-            file << auxZ << " ";
-            // normal
-            file << "1";
-            file << " 0";
-            file << " 0";
-            file << "\n";
+            file << auxX << " " << auxY << " " << auxZ << " " << normal;
+            file << auxX << " " << auxY - slicesY << " " << auxZ << " " << normal;
+            file << auxX << " " << auxY - slicesY << " " << auxZ - slicesZ << " " << normal;
 
-            file << auxX << " ";
-            file << auxY - slicesY << " ";
-            file << auxZ << " ";
-            // normal
-            file << "1";
-            file << " 0";
-            file << " 0";
-            file << "\n";
-
-            file << auxX << " ";
-            file << auxY - slicesY << " ";
-            file << auxZ - slicesZ << " ";
-            // normal
-            file << "1";
-            file << " 0";
-            file << " 0";
-            file << "\n";
-
-            file << auxX << " ";
-            file << auxY - slicesY << " ";
-            file << auxZ - slicesZ << " ";
-            // normal
-            file << "1";
-            file << " 0";
-            file << " 0";
-            file << "\n";
-
-            file << auxX << " ";
-            file << auxY << " ";
-            file << auxZ - slicesZ << " ";
-            // normal
-            file << "1";
-            file << " 0";
-            file << " 0";
-            file << "\n";
-
-            file << auxX << " ";
-            file << auxY << " ";
-            file << auxZ << " ";
-            // normal
-            file << "1";
-            file << " 0";
-            file << " 0";
-            file << "\n";
-
+            file << auxX << " " << auxY - slicesY << " " << auxZ - slicesZ << " " << normal;
+            file << auxX << " " << auxY << " " << auxZ - slicesZ << " " << normal;
+            file << auxX << " " << auxY << " " << auxZ << " " << normal;
             auxZ -= slicesZ;
         }
         auxZ = z1;
@@ -244,65 +102,18 @@ void drawBox(float x, float y, float z, int slices)
     // Lado Esquerdo
     auxX = -x1;
     auxZ = -z1;
-    auxY = y;
-    for (int i = 0; i < slices; i++)
-    {
-        for (int j = 0; j < slices; j++)
-        {
+    auxY = y-(y/2);
+    normal = "-1 0 0\n";
+    for (int i = 0; i < slices; i++){
+        for (int j = 0; j < slices; j++){
 
-            file << auxX << " ";
-            file << auxY << " ";
-            file << auxZ << " ";
-            // normal
-            file << "-1";
-            file << " 0";
-            file << " 0";
-            file << "\n";
+            file << auxX << " " << auxY << " " << auxZ << " " << normal;
+            file << auxX << " " << auxY - slicesY << " " << auxZ << " " << normal;
+            file << auxX << " " << auxY - slicesY << " " << auxZ + slicesZ << " " << normal;
 
-            file << auxX << " ";
-            file << auxY - slicesY << " ";
-            file << auxZ << " ";
-            // normal
-            file << "-1";
-            file << " 0";
-            file << " 0";
-            file << "\n";
-
-            file << auxX << " ";
-            file << auxY - slicesY << " ";
-            file << auxZ + slicesZ;
-            // normal
-            file << "-1";
-            file << " 0";
-            file << " 0";
-            file << "\n";
-
-            file << auxX << " ";
-            file << auxY - slicesY << " ";
-            file << auxZ + slicesZ << " ";
-            // normal
-            file << "-1";
-            file << " 0";
-            file << " 0";
-            file << "\n";
-
-            file << auxX << " ";
-            file << auxY << " ";
-            file << auxZ + slicesZ << " ";
-            // normal
-            file << "-1";
-            file << " 0";
-            file << " 0";
-            file << "\n";
-
-            file << auxX << " ";
-            file << auxY << " ";
-            file << auxZ << " ";
-            // normal
-            file << "-1";
-            file << " 0";
-            file << " 0";
-            file << "\n";
+            file << auxX << " " << auxY - slicesY << " " << auxZ + slicesZ << " " << normal;
+            file << auxX << " " << auxY << " " << auxZ + slicesZ << " " << normal;
+            file << auxX << " " << auxY << " " << auxZ << " " << normal;
 
             auxZ += slicesZ;
         }
@@ -313,65 +124,17 @@ void drawBox(float x, float y, float z, int slices)
     // Frente
     auxX = -x1;
     auxZ = z1;
-    auxY = y;
-    for (int i = 0; i < slices; i++)
-    {
-        for (int j = 0; j < slices; j++)
-        {
+    auxY = y-(y/2);
+    normal = "0 0 1\n";
+    for (int i = 0; i < slices; i++){
+        for (int j = 0; j < slices; j++){
+            file << auxX << " " << auxY << " " << auxZ << " " << normal;
+            file << auxX << " " << auxY - slicesY << " " << auxZ << " " << normal;
+            file << auxX + slicesX << " " << auxY - slicesY << " " << auxZ << " " << normal;
 
-            file << auxX << " ";
-            file << auxY << " ";
-            file << auxZ << " ";
-            // normal
-            file << "0";
-            file << " 0";
-            file << " 1";
-            file << "\n";
-
-            file << auxX << " ";
-            file << auxY - slicesY << " ";
-            file << auxZ << " ";
-            // normal
-            file << "0";
-            file << " 0";
-            file << " 1";
-            file << "\n";
-
-            file << auxX + slicesX << " ";
-            file << auxY - slicesY << " ";
-            file << auxZ << " ";
-            // normal
-            file << "0";
-            file << " 0";
-            file << " 1";
-            file << "\n";
-
-            file << auxX + slicesX << " ";
-            file << auxY - slicesY << " ";
-            file << auxZ << " ";
-            // normal
-            file << "0";
-            file << " 0";
-            file << " 1";
-            file << "\n";
-
-            file << auxX + slicesX << " ";
-            file << auxY << " ";
-            file << auxZ << " ";
-            // normal
-            file << "0";
-            file << " 0";
-            file << " 1";
-            file << "\n";
-
-            file << auxX << " ";
-            file << auxY << " ";
-            file << auxZ << " ";
-            // normal
-            file << "0";
-            file << " 0";
-            file << " 1";
-            file << "\n";
+            file << auxX + slicesX << " " << auxY - slicesY << " " << auxZ << " " << normal;
+            file << auxX + slicesX << " " << auxY << " " << auxZ << " " << normal;
+            file << auxX << " " << auxY << " " << auxZ << " " << normal;
 
             auxX += slicesX;
         }
@@ -382,66 +145,18 @@ void drawBox(float x, float y, float z, int slices)
     // Trás
     auxX = x1;
     auxZ = -z1;
-    auxY = y;
-    for (int i = 0; i < slices; i++)
-    {
-        for (int j = 0; j < slices; j++)
-        {
+    auxY = y-(y/2);
+    normal = "0 0 -1\n";
+    for (int i = 0; i < slices; i++){
+        for (int j = 0; j < slices; j++){
 
-            file << auxX << " ";
-            file << auxY << " ";
-            file << auxZ << " ";
-            // normal
-            file << "0";
-            file << " 0";
-            file << " -1";
-            file << "\n";
+            file << auxX << " " << auxY << " "<< auxZ << " " << normal;
+            file << auxX << " " << auxY - slicesY << " " << auxZ << " " << normal;
+            file << auxX - slicesX << " " << auxY - slicesY << " " << auxZ << " " << normal;
 
-            file << auxX << " ";
-            file << auxY - slicesY << " ";
-            file << auxZ << " ";
-            // normal
-            file << "0";
-            file << " 0";
-            file << " -1";
-            file << "\n";
-
-            file << auxX - slicesX << " ";
-            file << auxY - slicesY << " ";
-            file << auxZ << " ";
-            // normal
-            file << "0";
-            file << " 0";
-            file << " -1";
-            file << "\n";
-
-            file << auxX - slicesX << " ";
-            file << auxY - slicesY << " ";
-            file << auxZ << " ";
-            // normal
-            file << "0";
-            file << " 0";
-            file << " -1";
-            file << "\n";
-
-            file << auxX - slicesX << " ";
-            file << auxY << " ";
-            file << auxZ << " ";
-            // normal
-            file << "0";
-            file << " 0";
-            file << " -1";
-            file << "\n";
-
-            file << auxX << " ";
-            file << auxY << " ";
-            file << auxZ << " ";
-            // normal
-            file << "0";
-            file << " 0";
-            file << " -1";
-            file << "\n";
-
+            file << auxX - slicesX << " " << auxY - slicesY << " " << auxZ << " " << normal;
+            file << auxX - slicesX << " " << auxY << " " << auxZ << " " << normal;
+            file << auxX << " " << auxY << " " << auxZ << " " << normal;
             auxX -= slicesX;
         }
         auxX = x1;
@@ -449,9 +164,7 @@ void drawBox(float x, float y, float z, int slices)
     }
 }
 
-void drawPlane(float length, int divisions)
-{
-
+void drawPlane(float length, int divisions){
     float x1 = length / 2;
     float z1 = length / 2;
     float div = length / divisions;
@@ -463,71 +176,18 @@ void drawPlane(float length, int divisions)
 
     fstream file;
     file.open(filename, ios::out);
-    string coord;
-
-    for (i = 0; i < divisions; i++)
-    {
-        for (j = 0; j < divisions; j++)
-        {
-
+    string normal = "0 1 0\n";
+    for (i = 0; i < divisions; i++){
+        for (j = 0; j < divisions; j++){
             // 1º triangulo
-            file << x;
-            file << " 0 ";
-            file << z;
-            // normal
-            file << " 0";
-            file << " 1";
-            file << " 0";
-            file << "\n";
+            file << x << " 0 " << z << normal;
+            file << x + div << " 0 " << z + div << normal;
+            file << x + div << " 0 " << z << normal;
 
-            file << x + div;
-            file << " 0 ";
-            file << z + div;
-            // normal
-            file << " 0";
-            file << " 1";
-            file << " 0";
-            file << "\n";
-
-            file << x + div;
-            file << " 0 ";
-            file << z;
-            // normal
-            file << " 0";
-            file << " 1";
-            file << " 0";
-            file << "\n";
-
-
-            // 2 triangulo
-
-            file << x + div;
-            file << " 0 ";
-            file << z + div;
-            // normal
-            file << " 0";
-            file << " 1";
-            file << " 0";
-            file << "\n";
-
-            file << x;
-            file << " 0 ";
-            file << z;
-            // normal
-            file << " 0";
-            file << " 1";
-            file << " 0";
-            file << "\n";
-
-            file << x;
-            file << " 0 ";
-            file << z + div;
-            // normal
-            file << " 0";
-            file << " 1";
-            file << " 0";
-            file << "\n";
-
+            // 2º triangulo
+            file << x + div << " 0 " << z + div << normal;
+            file << x << " 0 " << z << normal;
+            file << x << " 0 " << z + div << normal;
             z += div;
         }
         z = -z1;
@@ -641,8 +301,8 @@ void createCone(float radius, float height, int slices, int stacks)
         nextTheta = theta + delta;
         //ponto e normal
         file << "0 0 0 ";file << "0 -1 0\n";
-        file << radius * sin(nextTheta) << " 0 " << radius * cos(nextTheta);file << " 0 -1 0\n";
-        file << radius * sin(theta) << " 0 " << radius * cos(theta);file << " 0 -1 0\n";
+        file << radius * sin(nextTheta) << " 0 " << radius * cos(nextTheta) << " 0 -1 0\n";
+        file << radius * sin(theta) << " 0 " << radius * cos(theta) << " 0 -1 0\n";
         
         theta = nextTheta;
     } // Fazer as laterais

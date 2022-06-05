@@ -77,7 +77,7 @@ public:
     std::list<Point> normals;
     std::list<Transformation> transformations{};
     std::string texture = "NaN";
-    float difuse_color[4] = {200,200,200,1};
+    float difuse_color[4] = {50,50,50,1};
     float ambient_color[4] = {50,50,50,1};
     float specular_color[4] = {0,0,0,1};
     float emissive_color[4] = {0,0,0,1};
