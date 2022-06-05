@@ -90,7 +90,11 @@ void Model::drawModel() const {
             index += 3;
         }
     }
-
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, difuse_color);
+    glMaterialfv(GL_FRONT,GL_AMBIENT,ambient_color);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, specular_color);
+    glMaterialfv(GL_FRONT,GL_EMISSION,emissive_color);
+    glMaterialf(GL_FRONT, GL_SHININESS, shininess);
     if(vbo){
         glGenBuffers(2,buffers);
         glBindBuffer(GL_ARRAY_BUFFER,buffers[0]);
@@ -112,14 +116,6 @@ void Model::drawModel() const {
             else glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
             //Draw model
             glBegin(GL_TRIANGLES);
-            //Draw faces using 2 alternating colors ignoring color info
-            if(drawModeFill && alternatingColorFaces){
-                if(i % 3 == 0) {
-                    color == 0? color = 1: color = 0;
-                }
-                i++;
-                glColor3f(color, 1-color, 1-color);
-            }
             //Draw vertex
             glVertex3f(point.x,point.y,point.z);
         }
@@ -146,6 +142,10 @@ void Model::printOut() {
     // Print Transformation list
     for( Transformation transformation : this->transformations){
         cout << transformation.toString();
+    }
+    for (Point p: normals) {
+        cout << p.x << " " << p.y << " " << p.z << "\n";
+
     }
 }
 
@@ -608,11 +608,6 @@ void renderScene(void) {
 
     // For each pair model list<transformation> apply transformations and draw model
     for(const Model& model:  modelsToDraw) {
-        glMaterialfv(GL_FRONT, GL_DIFFUSE, model.difuse_color);
-        glMaterialfv(GL_FRONT,GL_AMBIENT,model.ambient_color);
-        glMaterialfv(GL_FRONT, GL_SPECULAR, model.specular_color);
-        glMaterialfv(GL_FRONT,GL_EMISSION,model.emissive_color);
-        glMaterialf(GL_FRONT, GL_SHININESS, model.shininess);
         model.drawModel();
     }
     //draw axis if enabled
